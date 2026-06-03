@@ -1,6 +1,10 @@
 <?php
 
-require_once 'resources/lang/custom/locales.php';
+$lan = ['lan' => env('APP_LOCALE', 'en')];
+$localeFile = dirname(__DIR__).'/resources/lang/custom/locales.php';
+if (is_file($localeFile)) {
+    $lan = require $localeFile;
+}
 
 return [
 
@@ -83,7 +87,7 @@ return [
     */
 
     // 'locale' => 'en',
-    'locale' => $lan['lan'],
+    'locale' => $lan['lan'] ?? 'en',
 
     /*
     |--------------------------------------------------------------------------
@@ -97,7 +101,7 @@ return [
     */
 
     // 'fallback_locale' => 'en',
-    'fallback_locale' => $lan['lan'],
+    'fallback_locale' => $lan['lan'] ?? 'en',
 
     /*
     |--------------------------------------------------------------------------
