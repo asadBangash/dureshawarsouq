@@ -622,7 +622,7 @@ function gtext(){
 	
 	//isRTL
 	$isRTL = Language::where('language_code', app()->getLocale())->first();
-	$data['is_rtl'] = $isRTL['is_rtl'];
+	$data['is_rtl'] = $isRTL ? (int) $isRTL->is_rtl : 0;
 	
 	//facebook
  	$facebook = Tp_option::where('option_name', 'facebook')->get();

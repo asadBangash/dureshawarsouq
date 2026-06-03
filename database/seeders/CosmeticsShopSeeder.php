@@ -31,6 +31,7 @@ class CosmeticsShopSeeder extends Seeder
         $this->seedProducts($categories, $brands, $imagePool);
         $this->updateHomepageContent($logoFiles['banner']);
         $this->updateOffersAndVideoSection();
+        $this->ensureDefaultLanguage();
         $this->fixHomeMenuDropdown();
         $this->syncHeaderMenus();
         $this->updateHeroImagery($logoFiles['banner']);
@@ -547,5 +548,21 @@ class CosmeticsShopSeeder extends Seeder
                 'is_publish' => '1',
             ])]
         );
+    }
+
+    protected function ensureDefaultLanguage(): void
+    {
+        if (! DB::table('languages')->where('language_code', 'en')->exists()) {
+            DB::table('languages')->insert([
+                'language_code' => 'en',
+                'language_name' => 'English',
+                'flag' => null,
+                'language_default' => 1,
+                'is_rtl' => 0,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }
