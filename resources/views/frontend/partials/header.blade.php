@@ -1,4 +1,20 @@
 
+	<!--Announcement Bar-->
+	<div class="kashees-announce">
+		<div class="container">
+			<div class="kashees-announce__promo">
+				<span>{{ __('Premium Beauty & Cosmetics') }} &nbsp;•&nbsp; {{ __('Free delivery on orders above Rs.3000') }} &nbsp;•&nbsp; {{ __('Shop the new collection') }}</span>
+			</div>
+			<div class="kashees-announce__contact">
+				@if($gtext['phone'] != '')
+				<a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $gtext['phone']) }}" target="_blank"><i class="bi bi-whatsapp"></i>{{ __('WhatsApp') }}: {{ $gtext['phone'] }}</a>
+				<a href="tel:{{ $gtext['phone'] }}"><i class="bi bi-headset"></i>{{ __('Helpline') }}: {{ $gtext['phone'] }}</a>
+				@endif
+			</div>
+		</div>
+	</div>
+	<!--/Announcement Bar/-->
+
 	<header class="header">
 		<!--Top Header-->
 		<div class="top-header">

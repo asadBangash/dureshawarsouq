@@ -62,6 +62,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
 
 	@if($gtext['is_rtl'] == 1)
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -114,6 +115,7 @@
 	<link href="{{asset('public/frontend/css/style.css')}}" rel="stylesheet">
 	<link href="{{asset('public/frontend/css/responsive.css')}}" rel="stylesheet">
 	<link href="{{asset('public/frontend/css/dureshawar-brand.css')}}" rel="stylesheet">
+	<link href="{{asset('public/frontend/css/kashees-theme.css')}}?v={{ filemtime(public_path('frontend/css/kashees-theme.css')) }}" rel="stylesheet">
 	@stack('style')
 	@if($gtext['custom_css'] != '')
 	<style type="text/css">

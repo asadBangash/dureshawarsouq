@@ -44,6 +44,15 @@ $FooterSection = FooterSection();
 								@if($gtext['about_desc_footer'] != '')
 								<p>{{ $gtext['about_desc_footer'] }}</p>
 								@endif
+								<div class="kashees-social">
+									<a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+									<a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+									<a href="https://youtube.com" target="_blank" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+									<a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+									@if($gtext['phone'] != '')
+									<a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $gtext['phone']) }}" target="_blank" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+									@endif
+								</div>
 							</div>
 						</div>
 						@endif
