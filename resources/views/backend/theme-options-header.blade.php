@@ -41,6 +41,15 @@
 										</div>
 									</div>
 								</div>
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="form-group">
+											<label for="announcement_text">{{ __('Announcement Bar Text') }}</label>
+											<input value="{{ $datalist['announcement_text'] }}" type="text" name="announcement_text" id="announcement_text" class="form-control" placeholder="{{ __('e.g. Free delivery on orders above Rs.3000') }}">
+											<small class="text-muted">{{ __('Shown in the top promo bar. Leave empty to hide the promo text.') }}</small>
+										</div>
+									</div>
+								</div>
 
 								<div class="row">	
 									<div class="col-md-4">

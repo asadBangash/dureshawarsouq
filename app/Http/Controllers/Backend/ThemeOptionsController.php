@@ -150,10 +150,12 @@ class ThemeOptionsController extends Controller
 			$data['address'] = $dataObj->address;
 			$data['phone'] = $dataObj->phone;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['address'] = '';
 			$data['phone'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -167,11 +169,13 @@ class ThemeOptionsController extends Controller
 
 		$address = $request->input('address');
 		$phone = $request->input('phone');
+		$announcement_text = $request->input('announcement_text');
 		$is_publish = $request->input('is_publish');
 		
 		$option = array(
 			'address' => $address,
 			'phone' => $phone,
+			'announcement_text' => $announcement_text,
 			'is_publish' => $is_publish
 		);
 		
@@ -347,6 +351,7 @@ class ThemeOptionsController extends Controller
 		$is_publish_about = $request->input('is_publish_about');
 		$address = $request->input('address');
 		$phone = $request->input('phone');
+		$announcement_text = $request->input('announcement_text');
 		$email = $request->input('email');
 		$is_publish_contact = $request->input('is_publish_contact');
 		$copyright = $request->input('copyright');
@@ -556,12 +561,14 @@ class ThemeOptionsController extends Controller
 			$data['og_description'] = $dataObj->og_description;
 			$data['og_keywords'] = $dataObj->og_keywords;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['og_title'] = '';
 			$data['og_image'] = '';
 			$data['og_description'] = '';
 			$data['og_keywords'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -827,9 +834,11 @@ class ThemeOptionsController extends Controller
 			
 			$data['fb_app_id'] = $dataObj->fb_app_id;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['fb_app_id'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -905,9 +914,11 @@ class ThemeOptionsController extends Controller
 			
 			$data['fb_pixel_id'] = $dataObj->fb_pixel_id;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['fb_pixel_id'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -983,9 +994,11 @@ class ThemeOptionsController extends Controller
 			
 			$data['twitter_id'] = $dataObj->twitter_id;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['twitter_id'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -1059,9 +1072,11 @@ class ThemeOptionsController extends Controller
 			
 			$data['tracking_id'] = $dataObj->tracking_id;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['tracking_id'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -1135,9 +1150,11 @@ class ThemeOptionsController extends Controller
 			
 			$data['google_tag_manager_id'] = $dataObj->google_tag_manager_id;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['google_tag_manager_id'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -1213,11 +1230,13 @@ class ThemeOptionsController extends Controller
 			$data['whatsapp_text'] = $dataObj->whatsapp_text;
 			$data['position'] = $dataObj->position;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['whatsapp_id'] = '';
 			$data['whatsapp_text'] = '';
 			$data['position'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -1303,6 +1322,7 @@ class ThemeOptionsController extends Controller
 			$data['target'] = $dataObj->target;
 			$data['image'] = $dataObj->image;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['title'] = '';
 			$data['short_desc'] = '';
@@ -1312,6 +1332,7 @@ class ThemeOptionsController extends Controller
 			$data['target'] = '';
 			$data['image'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;
@@ -1487,6 +1508,7 @@ class ThemeOptionsController extends Controller
 			$data['position'] = $dataObj->position;
 			$data['style'] = $dataObj->style;
 			$data['is_publish'] = $dataObj->is_publish;
+			$data['announcement_text'] = $dataObj->announcement_text ?? '';
 		}else{
 			$data['title'] = '';
 			$data['message'] = '';
@@ -1496,6 +1518,7 @@ class ThemeOptionsController extends Controller
 			$data['position'] = '';
 			$data['style'] = '';
 			$data['is_publish'] = '2';
+			$data['announcement_text'] = '';
 		}
 		
 		$datalist = $data;

@@ -560,10 +560,12 @@ function gtext(){
 		$data['address'] = $theme_option_headerObj->address;
 		$data['phone'] = $theme_option_headerObj->phone;
 		$data['is_publish'] = $theme_option_headerObj->is_publish;
+		$data['announcement_text'] = $theme_option_headerObj->announcement_text ?? '';
 	}else{
 		$data['address'] = '';
 		$data['phone'] = '';
 		$data['is_publish'] = '';
+		$data['announcement_text'] = '';
 	}
 	
 	//Language Switcher

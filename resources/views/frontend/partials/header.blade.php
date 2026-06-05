@@ -1,147 +1,51 @@
 
-	<!--Announcement Bar-->
+	<!--Top Utility Bar (single)-->
 	<div class="kashees-announce">
 		<div class="container">
-			<div class="kashees-announce__promo">
-				<span>{{ __('Premium Beauty & Cosmetics') }} &nbsp;•&nbsp; {{ __('Free delivery on orders above Rs.3000') }} &nbsp;•&nbsp; {{ __('Shop the new collection') }}</span>
-			</div>
 			<div class="kashees-announce__contact">
 				@if($gtext['phone'] != '')
-				<a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $gtext['phone']) }}" target="_blank"><i class="bi bi-whatsapp"></i>{{ __('WhatsApp') }}: {{ $gtext['phone'] }}</a>
-				<a href="tel:{{ $gtext['phone'] }}"><i class="bi bi-headset"></i>{{ __('Helpline') }}: {{ $gtext['phone'] }}</a>
+				<a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $gtext['phone']) }}" target="_blank"><i class="bi bi-whatsapp"></i>{{ $gtext['phone'] }}</a>
+				@endif
+				@if($gtext['address'] != '')
+				<span class="kashees-announce__addr"><i class="bi bi-geo-alt"></i>{{ $gtext['address'] }}</span>
 				@endif
 			</div>
+
+			@if($gtext['announcement_text'] != '')
+			<div class="kashees-announce__promo">
+				<span>{!! $gtext['announcement_text'] !!}</span>
+			</div>
+			@endif
+
+			<ul class="kashees-announce__links">
+				<li><a href="{{ route('frontend.order-tracking') }}"><i class="bi bi-geo"></i>{{ __('Order Tracking') }}</a></li>
+				@auth
+				<li class="btn-group language-menu">
+					<a href="javascript:void(0);" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person"></i>{{ Auth::user()->name }}</a>
+					<ul class="dropdown-menu dropdown-menu-end">
+						<li><a class="dropdown-item" href="{{ route('frontend.my-dashboard') }}">{{ __('My Dashboard') }}</a></li>
+						<li><a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
+							<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+						</li>
+					</ul>
+				</li>
+				@else
+				@if (Route::has('frontend.register'))
+				<li><a href="{{ route('frontend.register') }}"><i class="bi bi-person-plus"></i>{{ __('Register') }}</a></li>
+				@endif
+				@if (Route::has('login'))
+				<li><a href="{{ route('frontend.login') }}"><i class="bi bi-person"></i>{{ __('Sign in') }}</a></li>
+				@endif
+				@endauth
+				@if($gtext['is_language_switcher'] == 1)
+				<li class="kashees-announce__lang">@php echo language(); @endphp</li>
+				@endif
+			</ul>
 		</div>
 	</div>
-	<!--/Announcement Bar/-->
+	<!--/Top Utility Bar/-->
 
 	<header class="header">
-		<!--Top Header-->
-		<div class="top-header">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-6">
-						@if($gtext['is_publish'] == 1)
-						<ul class="top-list-1">
-							@if($gtext['address'] != '')
-							<li><i class="bi bi-geo-alt"></i>{{ $gtext['address'] }}</li>
-							@endif
-							@if($gtext['phone'] != '')
-							<li><i class="bi bi-telephone"></i>{{ $gtext['phone'] }}</li>
-							@endif
-						</ul>
-						@endif
-					</div>
-					<div class="col-lg-6">
-						<ul class="top-list">
-							<li><a href="{{ route('frontend.order-tracking') }}"><i class="bi bi-geo"></i>{{ __('Order Tracking') }}</a></li>
-							@auth
-							<li>
-								<div class="btn-group language-menu">
-									<a href="javascript:void(0);" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-										{{ Auth::user()->name }}
-									</a>
-									<ul class="dropdown-menu dropdown-menu-end">
-										<li><a class="dropdown-item" href="{{ route('frontend.my-dashboard') }}">{{ __('My Dashboard') }}</a></li>
-										<li><a class="dropdown-item" href="{{ route('logout') }}"
-										onclick="event.preventDefault();
-										document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
-										<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-											@csrf
-										</form>
-										</li>
-									</ul>
-								</div>
-							</li>
-							@else
-							@if (Route::has('frontend.register'))
-							<li><a href="{{ route('frontend.register') }}"><i class="bi bi-person-plus"></i>{{ __('Register') }}</a></li>
-							@endif
-							@if (Route::has('login'))
-							<li><a href="{{ route('frontend.login') }}"><i class="bi bi-person"></i>{{ __('Sign in') }}</a></li>
-							@endif
-							@endauth
-							
-							@if($gtext['is_language_switcher'] == 1)
-							<li>
-								@php echo language(); @endphp
-							</li>
-							@endif
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div><!--/Top Header/-->
-		
-		<!--Desktop Header-->
-		<div class="header-desktop">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-3">
-						<div class="logo">
-							<a href="{{ url('/') }}">
-								<img src="{{ $gtext['front_logo'] ? asset('public/media/'.$gtext['front_logo']) : asset('public/frontend/images/logo.png') }}" alt="logo">
-							</a>
-						</div>
-					</div>
-					<div class="col-lg-5">
-						<form method="GET" action="{{ route('frontend.search') }}">
-							<div class="search-card">
-								<div class="search-box">
-									<input name="search" type="text" class="form-control" placeholder="{{ __('Search for Products') }}..." required />
-								</div>
-								<div class="cat-select">
-									<select class="form-select" name="category">
-										<option value="">{{ __('All Categories') }}</option>
-										@php echo CategoryListOption(); @endphp
-									</select>
-								</div>
-								<div class="search-btn">
-									<button type="submit" class="btn btn-search"><i class="bi bi-search"></i></button>
-								</div>
-							</div>
-						</form>
-					</div>
-					<div class="col-lg-4">
-						<ul class="head-round-icon">
-							<li>
-								<a href="{{ route('frontend.wishlist') }}">
-									<i class="bi bi-heart"></i>{{ __('Wishlist') }}
-									<span class="cart_count count_wishlist">0</span>
-								</a>
-							</li>
-							<li class="shopingCart">
-								<a href="javascript:void(0);" class="CartShowHide">
-									<i class="bi bi-cart"></i>{{ __('Cart') }}
-									<span class="cart_count total_qty">0</span>
-								</a>
-								<div class="shoping-cart-card headerShopingCart">
-									<div class="empty_card has_item_empty">
-										<div class="empty_img">
-											<img src="{{ asset('public/frontend/images/empty.png') }}" />
-										</div>
-										<h3>{{ __('Your cart is empty!') }}</h3>
-									</div>
-									
-									<div class="shoping-cart-body has_cart_item">
-										<ul class="cart_list" id="tp_cart_data"></ul>
-									</div>
-									
-									<div class="shoping-cart-footer has_cart_item">
-										<p>{{ __('Subtotal') }}<span class="sub_total">0</span></p>
-										<p>{{ __('Tax') }}<span class="tax">0</span></p>
-										<h6>{{ __('Total') }}<span class="tp_total">0</span></h6>
-										<a href="{{ route('frontend.cart') }}" class="btn view-cart-btn">{{ __('View Cart') }}</a>
-										<a href="{{ route('frontend.checkout') }}" class="btn checkout-btn">{{ __('Checkout') }}</a>
-									</div>
-									
-								</div>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div><!--/Desktop Header/-->
 		
 		<!--Mobile Header-->
 		<div class="header-mobile" id="sticky-header">
@@ -209,11 +113,19 @@
 			</div>
 		</div><!--/Mobile Header/-->
 		
-		<!--Menu-->
+		<!--Main Bar (logo + menu + search/cart)-->
 		<div class="header-menu" id="sticky-menu">
 			<div class="container">
-				<div class="row">
-					<div class="col-lg-3">
+				<div class="kashees-bar">
+					<!--Logo-->
+					<div class="kashees-bar__logo">
+						<a href="{{ url('/') }}">
+							<img src="{{ $gtext['front_logo'] ? asset('public/media/'.$gtext['front_logo']) : asset('public/frontend/images/logo.png') }}" alt="logo">
+						</a>
+					</div>
+
+					<!--Navigation-->
+					<div class="kashees-bar__nav">
 						<ul class="categories-wrap">
 							<li>
 								<a class="navCategoryListActive" href="javascript:void(0);">{{ __('Browse Categories') }}</a>
@@ -223,8 +135,6 @@
 								</ul>
 							</li>
 						</ul>
-					</div>
-					<div class="col-lg-9">
 						<div class="tp-mega-full">
 							<div class="tp-menu align-self-center">
 								<nav>
@@ -235,9 +145,57 @@
 							</div>
 						</div>
 					</div>
+
+					<!--Actions: search + wishlist + cart-->
+					<div class="kashees-bar__actions">
+						<form class="kashees-bar__search" method="GET" action="{{ route('frontend.search') }}">
+							<div class="search-card">
+								<div class="search-box">
+									<input name="search" type="text" class="form-control" placeholder="{{ __('Search') }}..." required />
+								</div>
+								<div class="search-btn">
+									<button type="submit" class="btn btn-search"><i class="bi bi-search"></i></button>
+								</div>
+							</div>
+						</form>
+						<ul class="head-round-icon">
+							<li>
+								<a href="{{ route('frontend.wishlist') }}">
+									<i class="bi bi-heart"></i>
+									<span class="cart_count count_wishlist">0</span>
+								</a>
+							</li>
+							<li class="shopingCart">
+								<a href="javascript:void(0);" class="CartShowHide">
+									<i class="bi bi-cart"></i>
+									<span class="cart_count total_qty">0</span>
+								</a>
+								<div class="shoping-cart-card headerShopingCart">
+									<div class="empty_card has_item_empty">
+										<div class="empty_img">
+											<img src="{{ asset('public/frontend/images/empty.png') }}" />
+										</div>
+										<h3>{{ __('Your cart is empty!') }}</h3>
+									</div>
+
+									<div class="shoping-cart-body has_cart_item">
+										<ul class="cart_list" id="tp_cart_data"></ul>
+									</div>
+
+									<div class="shoping-cart-footer has_cart_item">
+										<p>{{ __('Subtotal') }}<span class="sub_total">0</span></p>
+										<p>{{ __('Tax') }}<span class="tax">0</span></p>
+										<h6>{{ __('Total') }}<span class="tp_total">0</span></h6>
+										<a href="{{ route('frontend.cart') }}" class="btn view-cart-btn">{{ __('View Cart') }}</a>
+										<a href="{{ route('frontend.checkout') }}" class="btn checkout-btn">{{ __('Checkout') }}</a>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
-		</div><!--/Menu/-->
+		</div><!--/Main Bar/-->
 	</header>
 
 	<!-- off-canvas menu start -->
