@@ -321,25 +321,45 @@ a {
 	border-radius: 50px;
 	overflow: hidden;
 	background: #fff;
+	width: 100%;
+	height: auto;
+	margin-top: 0;
 }
 
 .kashees-bar__search .search-card .search-box {
 	flex: 1 1 auto;
+	width: auto;
+	float: none;
+	border-right: none;
+}
+
+.kashees-bar__search .search-card .search-btn {
+	width: auto;
+	float: none;
+	flex: 0 0 auto;
 }
 
 .kashees-bar__search .search-card .search-box .form-control {
 	border: 0;
 	height: 42px;
 	padding-left: 18px;
+	padding-right: 8px;
 	box-shadow: none;
 	font-family: var(--k-font-body);
 	font-size: 14px;
+	border-radius: 50px 0 0 50px;
+	background: transparent;
 }
 
-.kashees-bar__search .search-card .search-btn .btn {
+.kashees-bar__search .search-card .search-btn .btn,
+.kashees-bar__search .search-card .search-btn .btn-search {
 	height: 42px;
 	width: 48px;
-	border-radius: 0 !important;
+	min-width: 48px;
+	padding: 0;
+	margin: 0;
+	border: none !important;
+	border-radius: 0 50px 50px 0 !important;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1078,38 +1098,51 @@ a {
 }
 
 /* ==========================================================================
-   FEATURED CATEGORIES — circular Kashee's style
+   FEATURED CATEGORIES — full-width square image cards
    ========================================================================== */
 .featured-categories .featured-card,
-.featured-card {
+.featured-categories .owl-carousel .featured-card {
 	text-align: center;
-	transition: transform 0.3s ease;
-}
-
-.featured-card:hover {
-	transform: translateY(-5px);
-}
-
-.featured-card .featured-image {
-	width: 150px;
-	height: 150px;
-	margin: 0 auto 16px;
-	border-radius: 50%;
-	overflow: hidden;
-	background: var(--k-bg-soft);
-	border: 3px solid var(--k-pink-soft);
-	transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.featured-card:hover .featured-image {
-	border-color: var(--k-pink);
-	box-shadow: var(--k-shadow-pink);
-}
-
-.featured-card .featured-image img {
-	width: 100%;
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	background: var(--k-bg-soft) !important;
+	border-radius: 12px !important;
+	overflow: hidden !important;
 	height: 100%;
+}
+
+.featured-categories .featured-card:hover {
+	transform: translateY(-5px);
+	box-shadow: var(--k-shadow-md);
+}
+
+.featured-categories .featured-card .featured-image {
+	width: 100% !important;
+	height: auto !important;
+	aspect-ratio: 1 / 1;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+	overflow: hidden !important;
+	background: var(--k-bg-soft);
+	border: none !important;
+	display: block;
+	position: relative;
+}
+
+.featured-categories .featured-card .featured-image img {
+	width: 100% !important;
+	height: 100% !important;
+	margin: 0 !important;
+	display: block;
 	object-fit: cover;
+	object-position: center;
+	border-radius: 0 !important;
+	position: absolute;
+	inset: 0;
+}
+
+.featured-categories .featured-card .featured-title {
+	padding: 14px 12px 18px !important;
 }
 
 .featured-card .featured-title a {
@@ -1266,10 +1299,10 @@ a {
 @media (max-width: 991px) {
 	.section { padding: 44px 0; }
 	.section-heading h2 { font-size: 26px !important; }
-	.featured-card .featured-image { width: 120px; height: 120px; }
+	.featured-categories .featured-card .featured-title { padding: 12px 10px 16px !important; }
 }
 
 @media (max-width: 575px) {
 	.item-card .item-card-bottom .add-to-cart { font-size: 12px; padding: 9px 10px; }
-	.featured-card .featured-image { width: 100px; height: 100px; }
+	.featured-categories .featured-card .featured-title { padding: 10px 8px 14px !important; }
 }
