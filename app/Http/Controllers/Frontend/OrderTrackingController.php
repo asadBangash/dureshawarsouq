@@ -12,9 +12,8 @@ class OrderTrackingController extends Controller
     public function getOrderTracking(Request $request){
 		
 		$order_no = $request->input('order_no');
-		$email = $request->input('email');
 		
-		if(($order_no != '') && ($email != '')){
+		if($order_no != ''){
 				
 			$masterData = DB::table('order_masters as a')
 				->join('order_items as b', 'a.id', '=', 'b.order_master_id')
@@ -43,7 +42,6 @@ class OrderTrackingController extends Controller
 					'e.pstatus_name', 
 					'f.ostatus_name')
 				->where('a.order_no', $order_no)
-				->where('a.email', $email)
 				->groupBy(
 					'a.customer_id', 
 					'a.payment_status_id', 
@@ -70,7 +68,6 @@ class OrderTrackingController extends Controller
 				->join('order_masters', 'order_items.order_master_id', '=', 'order_masters.id')
 				->select('order_items.*', 'products.title', 'products.f_thumbnail', 'products.id')
 				->where('order_masters.order_no', $order_no)
-				->where('order_masters.email', $email)
 				->get();
 				
 			$isfind = "block";

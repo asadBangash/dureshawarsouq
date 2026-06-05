@@ -69,9 +69,6 @@
 							<div class="form-group">
 								<input name="order_no" type="text" class="form-control" placeholder="{{ __('Order#') }}" required />
 							</div>
-							<div class="form-group">
-								<input name="email" type="email" class="form-control" placeholder="{{ __('Email Address') }}" required />
-							</div>
 							<input type="submit" class="btn theme-btn" value="{{ __('Find') }}">
 						</form>
 					</div>
