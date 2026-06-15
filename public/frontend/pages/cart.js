@@ -17,6 +17,7 @@ $(function () {
 
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
+		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'box';
 
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
@@ -37,7 +38,7 @@ $(function () {
 		
 		$.ajax({
 			type : 'GET',
-			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty,
+			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit,
 			dataType:"json",
 			success: function (response) {
 				var msgType = response.msgType;
@@ -58,6 +59,7 @@ $(function () {
 
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
+		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'box';
 		
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
@@ -78,7 +80,7 @@ $(function () {
 		
 		$.ajax({
 			type : 'GET',
-			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty,
+			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit,
 			dataType:"json",
 			success: function (response) {
 				var msgType = response.msgType;
@@ -169,9 +171,7 @@ function onViewCart() {
 	});
 }
 
-function onRemoveToCart(id) {
-	var rowid = $("#removetocart_"+id).data('id');
-
+function onRemoveToCart(rowid) {
 	$.ajax({
 		type : 'GET',
 		url: base_url + '/frontend/remove_to_cart/'+rowid,

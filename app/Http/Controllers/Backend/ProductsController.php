@@ -40,7 +40,7 @@ class ProductsController extends Controller
 			->join('languages', 'products.lan', '=', 'languages.language_code')
 			->join('pro_categories', 'products.cat_id', '=', 'pro_categories.id')
 			->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
-			->join('users', 'products.user_id', '=', 'users.id')
+			->leftJoin('users', 'products.user_id', '=', 'users.id')
 			->select('products.*', 'pro_categories.name as category_name', 'brands.name as brand_name', 'tp_status.status', 'languages.language_name', 'users.shop_name')
 			->orderBy('products.id','desc')
 			->paginate(20);
@@ -66,7 +66,7 @@ class ProductsController extends Controller
 					->join('languages', 'products.lan', '=', 'languages.language_code')
 					->join('pro_categories', 'products.cat_id', '=', 'pro_categories.id')
 					->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
-					->join('users', 'products.user_id', '=', 'users.id')
+					->leftJoin('users', 'products.user_id', '=', 'users.id')
 					->select('products.*', 'pro_categories.name as category_name', 'brands.name as brand_name', 'tp_status.status', 'languages.language_name', 'users.shop_name')
 					->where(function ($query) use ($search){
 						$query->where('products.title', 'like', '%'.$search.'%')
@@ -101,7 +101,7 @@ class ProductsController extends Controller
 					->join('pro_categories', 'products.cat_id', '=', 'pro_categories.id')
 					->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
 					->select('products.*', 'pro_categories.name as category_name', 'brands.name as brand_name', 'tp_status.status', 'languages.language_name', 'users.shop_name')
-					->join('users', 'products.user_id', '=', 'users.id')
+					->leftJoin('users', 'products.user_id', '=', 'users.id')
 					->where(function ($query) use ($status){
 						$query->whereRaw("products.is_publish = '".$status."' OR '".$status."' = '0'");
 					})
@@ -135,16 +135,15 @@ class ProductsController extends Controller
 		$slug = esc(str_slug($request->input('slug')));
 		$lan = $request->input('lan');
 		$cat_id = $request->input('categoryid');
-		$brand_id = $request->input('brandid');
-		$user_id = $request->input('storeid');
+		$brand_id = $request->input('brandid') ?: 0;
+		$user_id = $request->input('storeid') ?: 0;
+		$short_desc = $request->input('short_desc');
 		
 		$validator_array = array(
 			'product_name' => $request->input('title'),
 			'slug' => $slug,
 			'language' => $request->input('lan'),
 			'category' => $request->input('categoryid'),
-			'brand' => $request->input('brandid'),
-			'store' => $request->input('storeid')
 		);
 		
 		$rId = $id == '' ? '' : ','.$id;
@@ -153,8 +152,6 @@ class ProductsController extends Controller
 			'slug' => 'required|max:191|unique:products,slug' . $rId,
 			'language' => 'required',
 			'category' => 'required',
-			'brand' => 'required',
-			'store' => 'required'
 		]);
 
 		$errors = $validator->errors();
@@ -182,22 +179,11 @@ class ProductsController extends Controller
 			$res['msg'] = $errors->first('category');
 			return response()->json($res);
 		}
-		
-		if($errors->has('brand')){
-			$res['msgType'] = 'error';
-			$res['msg'] = $errors->first('brand');
-			return response()->json($res);
-		}
-		
-		if($errors->has('store')){
-			$res['msgType'] = 'error';
-			$res['msg'] = $errors->first('store');
-			return response()->json($res);
-		}
 
 		$data = array(
 			'title' => $title,
 			'slug' => $slug,
+			'short_desc' => $short_desc,
 			'cat_id' => $cat_id,
 			'category_ids' => $cat_id,
 			'brand_id' => $brand_id,
@@ -358,7 +344,10 @@ class ProductsController extends Controller
 		$slug = esc(str_slug($request->input('slug')));
 		$short_desc = $request->input('short_desc');
 		$description = $request->input('description');
-		$brand_id = $request->input('brand_id');
+		if (($short_desc === null || trim((string) $short_desc) === '') && $description) {
+			$short_desc = \Illuminate\Support\Str::limit(strip_tags($description), 200);
+		}
+		$brand_id = $request->input('brand_id') ?: 0;
 		$tax_id = $request->input('tax_id');
 		$collection_id = $request->input('collection_id');
 		$is_featured = $request->input('is_featured');
@@ -367,9 +356,20 @@ class ProductsController extends Controller
 		$f_thumbnail = $request->input('f_thumbnail');
 		$category_ids = $request->input('cat_id');
 		$cat_id = $request->input('cat_id');
-		$user_id = $request->input('storeid');
-		$variation_size = $request->input('variation_size');
-		$sale_price = $request->input('sale_price');
+		$user_id = $request->input('storeid') ?: 0;
+		$box_price = $request->input('box_price') !== '' ? $request->input('box_price') : null;
+		$piece_price = $request->input('piece_price') !== '' ? $request->input('piece_price') : null;
+		$pieces_per_box = $request->input('pieces_per_box') !== '' ? $request->input('pieces_per_box') : null;
+
+		$units = array();
+		if ($box_price !== null) {
+			$units[] = 'Box';
+		}
+		if ($piece_price !== null) {
+			$units[] = 'Piece';
+		}
+		$variation_size = implode(',', $units);
+		$sale_price = $box_price ?? $piece_price;
 		
 		$validator_array = array(
 			'product_name' => $request->input('title'),
@@ -378,9 +378,9 @@ class ProductsController extends Controller
 			'category' => $request->input('cat_id'),
 			'language' => $request->input('lan'),
 			'status' => $request->input('is_publish'),
-			'store' => $request->input('storeid'),
-			'variation_size' => $request->input('variation_size'),
-			'sale_price' => $request->input('sale_price')
+			'box_price' => $box_price,
+			'piece_price' => $piece_price,
+			'pieces_per_box' => $pieces_per_box,
 		);
 		
 		$rId = $id == '' ? '' : ','.$id;
@@ -391,9 +391,9 @@ class ProductsController extends Controller
 			'language' => 'required',
 			'category' => 'required',
 			'status' => 'required',
-			'store' => 'required',
-			'variation_size' => 'required',
-			'sale_price' => 'required'
+			'box_price' => 'nullable|numeric|min:0',
+			'piece_price' => 'nullable|numeric|min:0',
+			'pieces_per_box' => 'nullable|integer|min:1',
 		]);
 
 		$errors = $validator->errors();
@@ -434,21 +434,21 @@ class ProductsController extends Controller
 			return response()->json($res);
 		}
 		
-		if($errors->has('store')){
+		if($errors->has('box_price')){
 			$res['msgType'] = 'error';
-			$res['msg'] = $errors->first('store');
+			$res['msg'] = $errors->first('box_price');
 			return response()->json($res);
 		}
 		
-		if($errors->has('variation_size')){
+		if($errors->has('piece_price')){
 			$res['msgType'] = 'error';
-			$res['msg'] = $errors->first('variation_size');
+			$res['msg'] = $errors->first('piece_price');
 			return response()->json($res);
 		}
-		
-		if($errors->has('sale_price')){
+
+		if($errors->has('pieces_per_box')){
 			$res['msgType'] = 'error';
-			$res['msg'] = $errors->first('sale_price');
+			$res['msg'] = $errors->first('pieces_per_box');
 			return response()->json($res);
 		}
 		
@@ -468,6 +468,9 @@ class ProductsController extends Controller
 			'user_id' => $user_id,
 			'variation_size' => $variation_size,
 			'sale_price' => $sale_price,
+			'box_price' => $box_price,
+			'piece_price' => $piece_price,
+			'pieces_per_box' => $pieces_per_box,
 			'lan' => $lan
 		);
 		

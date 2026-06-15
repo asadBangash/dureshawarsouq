@@ -110,22 +110,31 @@ $gtax = getTax();
 									
 								@endphp
 
-								<tr id="row_delete_{{ $row->id }}">
+								@php
+									$productId = $row->options->product_id ?? $row->id;
+								@endphp
+
+								<tr id="row_delete_{{ $row->rowId }}">
 									<td class="pro-image-w">
 										<div class="pro-image">
-											<a href="{{ route('frontend.product', [$row->id, str_slug($row->name)]) }}">
+											<a href="{{ route('frontend.product', [$productId, str_slug($row->name)]) }}">
 												<img src="{{ asset('public/media/'.$row->options->thumbnail) }}" alt="{{ $row->name }}">
 											</a>
 										</div>
 									</td>
 									<td class="pro-name-w" data-title="{{ __('Product') }}:">
-										<span class="pro-name"><a href="{{ route('frontend.product', [$row->id, str_slug($row->name)]) }}">{{ $row->name }}</a></span>
+										<span class="pro-name"><a href="{{ route('frontend.product', [$productId, str_slug($row->name)]) }}">{{ $row->name }}</a></span>
 									</td>
 									<td class="pro-store-w" data-title="{{ __('Sold By') }}:">
 										<a href="{{ route('frontend.stores', [$row->options->seller_id, str_slug($row->options->store_name)]) }}">{{ $row->options->store_name }}</a>
 									</td>
 									<td class="text-center pro-variation-w" data-title="{{ __('Unit') }}:">
-										<span class="pro-variation">{{ $row->options->unit }}</span>
+										<span class="pro-variation">
+											{{ $row->options->unit }}
+											@if($row->options->unit === 'Box' && !empty($row->options->pieces_per_box))
+											({{ $row->options->pieces_per_box }} {{ __('pcs') }})
+											@endif
+										</span>
 									</td>
 									<td class="text-center pro-price-w" data-title="{{ __('Price') }}:">
 										<span class="pro-price"><span class="pro-price">{{ $price }}</span></span>
@@ -137,7 +146,7 @@ $gtax = getTax();
 										<span class="pro-total-price">{{ $totalPrice }}</span>
 									</td>
 									<td class="text-center pro-remove-w" data-title="Remove:">
-										<a data-id="{{ $row->rowId }}" id="removetoviewcart_{{ $row->id }}" onclick="onRemoveToCart({{ $row->id }})" href="javascript:void(0);" class="pro-remove"><i class="bi bi-x-lg"></i></a>
+										<a data-id="{{ $row->rowId }}" id="removetoviewcart_{{ $row->rowId }}" onclick="onRemoveToCart('{{ $row->rowId }}')" href="javascript:void(0);" class="pro-remove"><i class="bi bi-x-lg"></i></a>
 									</td>
 								</tr>
 								@endforeach

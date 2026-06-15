@@ -250,7 +250,7 @@ class CheckoutFrontController extends Controller
 				'order_master_id' => $order_master_id,
 				'customer_id' => $customer_id,
 				'seller_id' => $seller_id,
-				'product_id' => $row->id,
+				'product_id' => $row->options->product_id ?? $row->id,
 				'variation_size' => $row->options->unit,
 				'quantity' => comma_remove($row->qty),
 				'price' => comma_remove($row->price),

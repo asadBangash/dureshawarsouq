@@ -12,29 +12,49 @@ use Cart;
 class CartController extends Controller
 {
 	//Add to Cart
-	public function AddToCart($id, $qty){
+	public function AddToCart(Request $request, $id, $qty){
 
 		$res = array();
 		$datalist = Product::where('id', $id)->first();
-		$user = User::where('id', $datalist['user_id'])->first();
+		$user = $datalist['user_id'] > 0 ? User::where('id', $datalist['user_id'])->first() : null;
+
+		$unit = strtolower($request->query('unit', 'box'));
+		if ($unit === 'piece') {
+			$price = $datalist['piece_price'];
+			$unitLabel = 'Piece';
+		} else {
+			$price = $datalist['box_price'];
+			$unitLabel = 'Box';
+			$unit = 'box';
+		}
+
+		if ($price === null || $price === '') {
+			$res['msgType'] = 'error';
+			$res['msg'] = __('Price is not available for the selected unit.');
+			return response()->json($res);
+		}
 
 		$data = array();
-		$data['id'] = $datalist['id'];
+		$data['id'] = $datalist['id'] . '-' . $unit;
 		$data['name'] = $datalist['title'];
 		$data['qty'] = $qty == 0 ? 1 : $qty;
-		$data['price'] = $datalist['sale_price'];
+		$data['price'] = $price;
 		$data['weight'] = 0;
 		$data['options'] = array();
+		$data['options']['product_id'] = $datalist['id'];
 		$data['options']['thumbnail'] = $datalist['f_thumbnail'];
-		$data['options']['unit'] = $datalist['variation_size'];
+		$data['options']['unit'] = $unitLabel;
+		if ($unit === 'box' && !empty($datalist['pieces_per_box'])) {
+			$data['options']['pieces_per_box'] = $datalist['pieces_per_box'];
+		}
 		$data['options']['seller_id'] = $datalist['user_id'];
-		$data['options']['seller_name'] = $user['name'];
-		$data['options']['store_name'] = $user['shop_name'];
-		$data['options']['store_logo'] = $user['photo'];
-		$data['options']['store_url'] = $user['shop_url'];
-		$data['options']['seller_email'] = $user['email'];
-		$data['options']['seller_phone'] = $user['phone'];
-		$data['options']['seller_address'] = $user['address'];
+		$data['options']['seller_name'] = $user ? $user['name'] : '';
+		$data['options']['store_name'] = $user ? $user['shop_name'] : '';
+		$data['options']['store_logo'] = $user ? $user['photo'] : '';
+		$data['options']['store_url'] = $user ? $user['shop_url'] : '';
+		$data['options']['seller_email'] = $user ? $user['email'] : '';
+		$data['options']['seller_phone'] = $user ? $user['phone'] : '';
+		$data['options']['seller_address'] = $user ? $user['address'] : '';
 
 		$response = Cart::instance('shopping')->add($data);
 		if($response){
@@ -65,6 +85,12 @@ class CartController extends Controller
 			$row->setTaxRate($tax_rate);
 			Cart::instance('shopping')->update($row->rowId, $row->qty);
 
+			$productId = $row->options->product_id ?? $row->id;
+			$unitDisplay = $row->options->unit;
+			if ($row->options->unit === 'Box' && !empty($row->options->pieces_per_box)) {
+				$unitDisplay .= ' ('.$row->options->pieces_per_box.' pcs)';
+			}
+
 			if($gtext['currency_position'] == 'left'){
 				$price = '<span id="product-quatity">'.$row->qty.'</span> x '.$gtext['currency_icon'].$row->price; 
 			}else{
@@ -73,13 +99,13 @@ class CartController extends Controller
 		
 			$items .= '<li>
 						<div class="cart-item-card">
-							<a data-id="'.$row->rowId.'" id="removetocart_'.$row->id.'" onclick="onRemoveToCart('.$row->id.')" href="javascript:void(0);" class="item-remove"><i class="bi bi-x"></i></a>
+							<a data-id="'.$row->rowId.'" id="removetocart_'.$row->rowId.'" onclick="onRemoveToCart(\''.$row->rowId.'\')" href="javascript:void(0);" class="item-remove"><i class="bi bi-x"></i></a>
 							<div class="cart-item-img">
 								<img src="'.$Path.'/'.$row->options->thumbnail.'" alt="'.$row->name.'" />
 							</div>
 							<div class="cart-item-desc">
-								<h6><a href="'.route('frontend.product', [$row->id, str_slug($row->name)]).'">'.$row->name.'</a></h6>
-								<p>'.$price.'</p>
+								<h6><a href="'.route('frontend.product', [$productId, str_slug($row->name)]).'">'.$row->name.'</a></h6>
+								<p>'.$price.' ('.$unitDisplay.')</p>
 							</div>
 						</div>
 					</li>';
@@ -177,25 +203,25 @@ class CartController extends Controller
 
 		$res = array();
 		$datalist = Product::where('id', $id)->first();
-		$user = User::where('id', $datalist['user_id'])->first();
+		$user = $datalist['user_id'] > 0 ? User::where('id', $datalist['user_id'])->first() : null;
 		
 		$data = array();
 		$data['id'] = $datalist['id'];
 		$data['name'] = $datalist['title'];
 		$data['qty'] = 1;
-		$data['price'] = $datalist['sale_price'];
+		$data['price'] = $datalist['box_price'] ?? $datalist['piece_price'] ?? $datalist['sale_price'];
 		$data['weight'] = 0;
 		$data['options'] = array();
 		$data['options']['thumbnail'] = $datalist['f_thumbnail'];
 
 		$data['options']['seller_id'] = $datalist['user_id'];
-		$data['options']['seller_name'] = $user['name'];
-		$data['options']['store_name'] = $user['shop_name'];
-		$data['options']['store_logo'] = $user['photo'];
-		$data['options']['store_url'] = $user['shop_url'];
-		$data['options']['seller_email'] = $user['email'];
-		$data['options']['seller_phone'] = $user['phone'];
-		$data['options']['seller_address'] = $user['address'];		
+		$data['options']['seller_name'] = $user ? $user['name'] : '';
+		$data['options']['store_name'] = $user ? $user['shop_name'] : '';
+		$data['options']['store_logo'] = $user ? $user['photo'] : '';
+		$data['options']['store_url'] = $user ? $user['shop_url'] : '';
+		$data['options']['seller_email'] = $user ? $user['email'] : '';
+		$data['options']['seller_phone'] = $user ? $user['phone'] : '';
+		$data['options']['seller_address'] = $user ? $user['address'] : '';		
 		
 		$response = Cart::instance('wishlist')->add($data);
 		if($response){

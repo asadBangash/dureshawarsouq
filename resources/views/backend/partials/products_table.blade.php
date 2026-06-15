@@ -4,7 +4,7 @@
 			<tr>
 				<th class="checkboxlist text-center" style="width:5%"><input class="tp-check-all checkAll" type="checkbox"></th>
 				<th class="text-left" style="width:21%">{{ __('Product Name') }}</th>
-				<th class="text-left" style="width:15%">{{ __('Category') }}</th>
+				<th class="text-left" style="width:20%">{{ __('Description') }}</th>
 				<th class="text-left" style="width:15%">{{ __('Brand') }}</th>
 				<th class="text-center" style="width:10%">{{ __('Store') }}</th>
 				<th class="text-center" style="width:10%">{{ __('Language') }}</th>
@@ -20,14 +20,14 @@
 				<td class="checkboxlist text-center"><input name="item_ids[]" value="{{ $row->id }}" class="tp-checkbox selected_item" type="checkbox"></td> 
 				
 				<td class="text-left"><a href="{{ route('backend.product', [$row->id]) }}" title="{{ __('Edit') }}">{{ $row->title }}</a></td>
-				<td class="text-left">{{ $row->category_name }}</td>
+				<td class="text-left">{{ $row->short_desc ? str_limit($row->short_desc, 60) : '—' }}</td>
 				@if($row->brand_id == '0')
 				<td class="text-left">No Brand</td>
 				@else
 				<td class="text-left">{{ $row->brand_name }}</td>
 				@endif
 				
-				<td class="text-center">{{ $row->shop_name }}</td>
+				<td class="text-center">{{ $row->shop_name ?: '—' }}</td>
 				<td class="text-center">{{ $row->language_name }}</td>
 				
 				@if ($row->f_thumbnail != '')

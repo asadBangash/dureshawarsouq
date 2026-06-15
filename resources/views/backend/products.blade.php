@@ -164,7 +164,7 @@
 								</div>	
 								<div class="col-md-3">
 									<div class="form-group">
-										<label for="brandid">{{ __('Brand') }}<span class="red">*</span></label>
+										<label for="brandid">{{ __('Brand') }}</label>
 										<select name="brandid" id="brandid" class="chosen-select form-control">
 											<option value="0">No Brand</option>
 											@foreach($brandlist as $row)
@@ -177,14 +177,23 @@
 								</div>	
 								<div class="col-md-3">
 									<div class="form-group">
-										<label for="storeid">{{ __('Store') }}<span class="red">*</span></label>
+										<label for="storeid">{{ __('Store') }}</label>
 										<select name="storeid" id="storeid" class="chosen-select form-control">
+										<option value="0">{{ __('No Store') }}</option>
 										@foreach($storeList as $row)
 											<option value="{{ $row->id }}">
 												{{ $row->shop_name }}
 											</option>
 										@endforeach
 										</select>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="form-group">
+										<label for="short_desc">{{ __('Description') }}</label>
+										<textarea name="short_desc" id="short_desc" class="form-control" rows="3" placeholder="{{ __('Short product description shown on the website') }}"></textarea>
 									</div>
 								</div>
 							</div>

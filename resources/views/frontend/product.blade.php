@@ -88,24 +88,27 @@
 				<div class="col-xl-7">
 					<div class="pr_details">
 						<h4 class="product_title">{{ $data->title }}</h4>
-						@if($data->short_desc != '')
-						<p>{{ $data->short_desc }}</p>
-						@endif
-						@if($data->shop_name != '')
+						@if(!empty($data->seller_id) && !empty($data->shop_name) && !empty($data->shop_url))
 						<div class="pr_extra"><strong>{{ __('Sold By') }}:</strong> <a href="{{ route('frontend.stores', [$data->seller_id, str_slug($data->shop_url)]) }}">{{ $data->shop_name }}</a></div>
 						@endif
+						@php
+							$hasBoxPrice = $data->box_price !== null && $data->box_price !== '';
+							$hasPiecePrice = $data->piece_price !== null && $data->piece_price !== '';
+							$defaultUnit = $hasBoxPrice ? 'box' : ($hasPiecePrice ? 'piece' : 'box');
+							$defaultPrice = $hasBoxPrice ? $data->box_price : ($hasPiecePrice ? $data->piece_price : null);
+							$piecesPerBox = $data->pieces_per_box;
+						@endphp
+						@if($defaultPrice !== null)
 						<div class="product_price">
-							@if($data->sale_price != '')
-								@if($gtext['currency_position'] == 'left')
-								<div class="item-price">{{ $gtext['currency_icon'] }}{{ number_format($data->sale_price) }}</div>
-								@else
-								<div class="item-price">{{ number_format($data->sale_price) }}{{ $gtext['currency_icon'] }}</div>
-								@endif
+							@if($gtext['currency_position'] == 'left')
+							<div class="item-price" id="product-display-price">{{ $gtext['currency_icon'] }}{{ number_format($defaultPrice, 2) }}</div>
+							@else
+							<div class="item-price" id="product-display-price">{{ number_format($defaultPrice, 2) }}{{ $gtext['currency_icon'] }}</div>
 							@endif
-							@if(($data->is_discount == 1) && ($data->old_price !=''))
+							@if(($data->is_discount == 1) && ($data->old_price !='') && $defaultPrice)
 								
 								@php 
-									$discount = number_format((($data->old_price - $data->sale_price)*100)/$data->old_price);
+									$discount = number_format((($data->old_price - $defaultPrice)*100)/$data->old_price);
 								@endphp
 							
 								@if($gtext['currency_position'] == 'left')
@@ -115,12 +118,22 @@
 								@endif
 							@endif
 						</div>
-						@if($data->variation_size != '')
+						@endif
+						@if($hasBoxPrice || $hasPiecePrice)
 						<div class="pr_widget">
-							<label class="widget-title">{{ __('Unit') }}</label>
-							<ul class="widget-size">
-								<li class="unit active">{{ $data->variation_size }}</li>
+							<label class="widget-title">{{ __('Order By') }}</label>
+							@if($piecesPerBox)
+							<div class="pr_extra pieces-per-box-note">{{ __('1 Box contains') }} {{ $piecesPerBox }} {{ __('pieces') }}</div>
+							@endif
+							<ul class="widget-size product-unit-selector">
+								@if($hasBoxPrice)
+								<li class="unit-option {{ $defaultUnit === 'box' ? 'active' : '' }}" data-unit="box" data-price="{{ $data->box_price }}"><a href="javascript:void(0);">{{ __('Box') }}@if($piecesPerBox) ({{ $piecesPerBox }} {{ __('pcs') }})@endif</a></li>
+								@endif
+								@if($hasPiecePrice)
+								<li class="unit-option {{ $defaultUnit === 'piece' ? 'active' : '' }}" data-unit="piece" data-price="{{ $data->piece_price }}"><a href="javascript:void(0);">{{ __('Piece') }}</a></li>
+								@endif
 							</ul>
+							<input type="hidden" id="selected_unit" value="{{ $defaultUnit }}">
 						</div>
 						@endif
 						<div class="pr_quantity">
@@ -148,7 +161,6 @@
 						@if($data->brandname != '')
 						<div class="pr_extra"><strong>{{ __('Brand') }}: </strong><a href="{{ route('frontend.brand', [$data->brand_id, str_slug($data->brandname)]) }}"> {{ $data->brandname }}</a></div>
 						@endif
-						<div class="pr_extra"><strong>{{ __('Category') }}: </strong> <a href="{{ route('frontend.product-category', [$data->cat_id, $data->cat_slug]) }}">{{ $data->cat_name }}</a></div>
 						
 						<div class="pr_widget">
 							<label class="widget-title">{{ __('Share this') }}</label>
@@ -163,7 +175,7 @@
 				</div>
 			</div>
 			
-			<!-- Product Description Review and Vendor -->
+			<!-- Product Description & Reviews -->
 			<div class="row">
 				<div class="col-lg-12">
 					@if(Session::has('success'))
@@ -193,7 +205,6 @@
 						<div class="desc-review-nav nav">
 							<a class="active" href="#des_description" data-bs-toggle="tab">{{ __('Description') }}</a>
 							<a href="#des_reviews" data-bs-toggle="tab">{{ __('Reviews') }} ({{ $data->TotalReview }})</a>
-							<a href="#vendor" data-bs-toggle="tab">{{ __('Vendor') }}</a>
 						</div>
 						<div class="tab-content">
 							<!-- Description -->
@@ -264,46 +275,11 @@
 								</div>
 							</div>
 							<!-- /Review/ -->
-							
-							<!-- Vendor -->
-							<div id="vendor" class="tab-pane">
-								<div class="store-content">
-									<div class="row">
-										<div class="col-lg-12">
-											<div class="stores-card">
-												<div class="store-logo">
-													@if($seller_data->photo == '')
-													<span class="text">{{ sub_str($seller_data->shop_name, 0,1) }}</span>
-													@else
-													<img src="{{ asset('public/media/'.$seller_data->photo) }}" alt="{{ $seller_data->shop_name }}"/>
-													@endif
-												</div>
-												<div class="desc">
-													<h3 class="store-name"><a href="{{ route('frontend.stores', [$data->seller_id, str_slug($data->shop_url)]) }}">{{ $seller_data->shop_name }}</a></h3>
-													<h6 class="since">{{ __('Since') }} {{ date('Y', strtotime($seller_data->created_at)) }}</h6>
-													<div class="rating-wrap">
-														<div class="stars-outer">
-															<div class="stars-inner" style="width:{{ $SellerReview['ReviewPercentage'] }}%;"></div>
-														</div>
-														<span class="rating-count">({{ $SellerReview['TotalReview'] }})</span>
-													</div>
-													<ul class="info">
-														<li><i class="bi bi-telephone"></i>{{ $seller_data->phone }}</li>
-														<li><i class="bi bi-envelope"></i>{{ $seller_data->email }}</li>
-														<li><i class="bi bi-geo-alt"></i>{{ $seller_data->address }}</li>
-													</ul>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- /Vendor/ -->
 						</div>
 					</div>
 				</div>
 			</div>
-			<!-- /Product Description Review and Vendor/ -->		
+			<!-- /Product Description & Reviews/ -->		
 		</div>
 	</section>
 	<!-- /Inner Section/ -->
@@ -342,9 +318,6 @@
 									<div class="stars-inner" style="width:{{ $row->ReviewPercentage }}%;"></div>
 								</div>
 								<span class="rating-count">({{ $row->TotalReview }})</span>
-							</div>
-							<div class="item-sold">
-								{{ __('Sold By') }} <a href="{{ route('frontend.stores', [$row->seller_id, str_slug($row->shop_url)]) }}">{{ str_limit($row->shop_name) }}</a>
 							</div>
 							<div class="item-pric-card">
 								@if($row->sale_price != '')
@@ -396,9 +369,6 @@
 								</div>
 								<span class="rating-count">({{ $row->TotalReview }})</span>
 							</div>
-							<div class="item-sold">
-								{{ __('Sold By') }} <a href="{{ route('frontend.stores', [$row->seller_id, str_slug($row->shop_url)]) }}">{{ str_limit($row->shop_name) }}</a>
-							</div>
 							<div class="item-pric-card">
 								@if($row->sale_price != '')
 									@if($gtext['currency_position'] == 'left')
@@ -439,6 +409,8 @@
  	var item_id = "{{ $data->id }}";
 	var is_stock = "{{ $data->is_stock }}";
 	var is_stock_status = "{{ $data->stock_status_id }}";
+	var currency_position = "{{ $gtext['currency_position'] }}";
+	var currency_icon = "{{ $gtext['currency_icon'] }}";
 	
 var TEXT = [];
 	TEXT['Please enter quantity.'] = "{{ __('Please enter quantity.') }}";

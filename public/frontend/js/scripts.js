@@ -311,6 +311,13 @@
 	});
 	
 	//Price Range
+	function formatPriceRange(minPrice, maxPrice) {
+		if (typeof currency_position !== 'undefined' && currency_position === 'left') {
+			return currency_icon + minPrice + ' - ' + currency_icon + maxPrice;
+		}
+		return minPrice + currency_icon + ' - ' + maxPrice + currency_icon;
+	}
+
     $( "#slider-range" ).slider({
       range: true,
       min: 0,
@@ -321,12 +328,12 @@
 		var maxPrice = ui.values[1];
 		$("#filter_min_price").val(minPrice);
 		$("#filter_max_price").val(maxPrice);
-        $( "#amount" ).text( "$" + minPrice + " - $" + maxPrice);
+        $( "#amount" ).text(formatPriceRange(minPrice, maxPrice));
       }
     });
 	var minPrice = $( "#slider-range" ).slider( "values", 0);
 	var maxPrice = $( "#slider-range" ).slider( "values", 1);
-	$( "#amount" ).text("$" +minPrice+ " - $" + maxPrice);
+	$( "#amount" ).text(formatPriceRange(minPrice, maxPrice));
 	
 	//Product Setails Slider
 	$('.pd-slider-for').slick({

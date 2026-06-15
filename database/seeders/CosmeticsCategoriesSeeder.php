@@ -38,7 +38,7 @@ class CosmeticsCategoriesSeeder extends Seeder
 
         $this->clearDummyCatalog();
         $categoryMap = $this->seedCategoriesFromExcel();
-        $this->syncProductsMenu($categoryMap);
+        $this->syncShopMegaMenu();
 
         $this->command?->info('Cosmetics categories seeded from Excel. Products and brands cleared.');
         $this->command?->info('Run your product import next — categories are ready.');
@@ -175,7 +175,8 @@ class CosmeticsCategoriesSeeder extends Seeder
         return false;
     }
 
-    protected function syncProductsMenu(array $categoryMap): void
+    /** Sync Shop nav item as a two-column mega menu (Categories + More). */
+    public function syncShopMegaMenu(): void
     {
         $menu = DB::table('menus')
             ->where('menu_position', 'header')
@@ -188,7 +189,7 @@ class CosmeticsCategoriesSeeder extends Seeder
 
         $menuId = (int) $menu->id;
 
-        $productsMenu = DB::table('menu_parents')
+        $shopMenu = DB::table('menu_parents')
             ->where('menu_id', $menuId)
             ->where(function ($query) {
                 $query->where('item_label', 'Shop')
@@ -196,23 +197,51 @@ class CosmeticsCategoriesSeeder extends Seeder
             })
             ->first();
 
-        if (! $productsMenu) {
+        if (! $shopMenu) {
             return;
         }
 
-        $menuParentId = (int) $productsMenu->id;
+        $menuParentId = (int) $shopMenu->id;
+        $now = now();
 
         DB::table('menu_parents')
             ->where('id', $menuParentId)
             ->update([
-                'item_label' => 'Products',
-                'child_menu_type' => 'dropdown',
+                'item_label' => 'Shop',
+                'child_menu_type' => 'mega_menu',
                 'custom_url' => '#',
-                'updated_at' => now(),
+                'column' => 2,
+                'width_type' => 'fixed_width',
+                'width' => 550,
+                'updated_at' => $now,
             ]);
 
         DB::table('menu_childs')->where('menu_parent_id', $menuParentId)->delete();
         DB::table('mega_menus')->where('menu_parent_id', $menuParentId)->delete();
+
+        $megaCategoriesId = DB::table('mega_menus')->insertGetId([
+            'menu_id' => $menuId,
+            'menu_parent_id' => $menuParentId,
+            'mega_menu_title' => 'Categories',
+            'is_title' => 1,
+            'is_image' => 0,
+            'lan' => 'en',
+            'sort_order' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $megaMoreId = DB::table('mega_menus')->insertGetId([
+            'menu_id' => $menuId,
+            'menu_parent_id' => $menuParentId,
+            'mega_menu_title' => 'More',
+            'is_title' => 1,
+            'is_image' => 0,
+            'lan' => 'en',
+            'sort_order' => 2,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         $parents = Pro_category::where('lan', 'en')
             ->where('is_publish', 1)
@@ -229,30 +258,31 @@ class CosmeticsCategoriesSeeder extends Seeder
 
         $sort = 1;
         foreach ($parents as $parent) {
-            $this->insertMenuCategory($menuId, $menuParentId, $parent, $sort++);
+            $this->insertMenuCategory($menuId, $menuParentId, $parent, $sort++, $megaCategoriesId);
+        }
 
-            if ($parent->name === 'Lip Products') {
-                $children = Pro_category::where('lan', 'en')
-                    ->where('is_publish', 1)
-                    ->where('parent_id', $parent->id)
-                    ->orderBy('name')
-                    ->get();
+        $lipParent = $parents->firstWhere('name', 'Lip Products');
+        if ($lipParent) {
+            $children = Pro_category::where('lan', 'en')
+                ->where('is_publish', 1)
+                ->where('parent_id', $lipParent->id)
+                ->orderBy('name')
+                ->get();
 
-                foreach ($children as $child) {
-                    $this->insertMenuCategory($menuId, $menuParentId, $child, $sort++);
-                }
+            foreach ($children as $child) {
+                $this->insertMenuCategory($menuId, $menuParentId, $child, $sort++, $megaMoreId);
             }
         }
 
         DB::table('menu_childs')->where('menu_parent_id', 952)->delete();
     }
 
-    protected function insertMenuCategory(int $menuId, int $menuParentId, Pro_category $category, int $sort): void
+    protected function insertMenuCategory(int $menuId, int $menuParentId, Pro_category $category, int $sort, ?int $megaMenuId = null): void
     {
         DB::table('menu_childs')->insert([
             'menu_id' => $menuId,
             'menu_parent_id' => $menuParentId,
-            'mega_menu_id' => null,
+            'mega_menu_id' => $megaMenuId,
             'menu_type' => 'product_category',
             'item_id' => $category->id,
             'item_label' => $category->name,

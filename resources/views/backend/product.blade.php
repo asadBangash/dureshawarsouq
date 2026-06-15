@@ -63,14 +63,6 @@
 								</div>
 								<div class="row">	
 									<div class="col-lg-12">
-										<div class="form-group">
-											<label for="short_desc">{{ __('Short Description') }}</label>
-											<textarea name="short_desc" id="short_desc" class="form-control" rows="2">{{ $datalist['short_desc'] }}</textarea>
-										</div>
-									</div>
-								</div>
-								<div class="row">	
-									<div class="col-lg-12">
 										<div class="form-group tpeditor">
 											<label for="description">{{ __('Product Content') }}</label>
 											<textarea name="description" id="description" class="form-control" rows="4">{{ $datalist['description'] }}</textarea>
@@ -80,7 +72,7 @@
 								<div class="row">	
 									<div class="col-lg-6">
 										<div class="form-group">
-											<label for="brand_id">{{ __('Brand') }}<span class="red">*</span></label>
+											<label for="brand_id">{{ __('Brand') }}</label>
 											<select name="brand_id" id="brand_id" class="chosen-select form-control">
 											<option value="0">No Brand</option>
 											@foreach($brandlist as $row)
@@ -121,16 +113,29 @@
 									</div>
 									<div class="col-lg-6">
 										<div class="form-group">
-											<label for="sale_price">{{ __('Sale Price') }}<span class="red">*</span></label>
-											<input value="{{ $datalist['sale_price'] }}" name="sale_price" id="sale_price" type="text" class="form-control parsley-validated" data-required="true">
+											<label for="pieces_per_box">{{ __('Pieces Per Box') }}</label>
+											<input value="{{ $datalist['pieces_per_box'] ?? '' }}" name="pieces_per_box" id="pieces_per_box" type="number" min="1" class="form-control" placeholder="{{ __('e.g. 12') }}">
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="form-group">
+											<label for="box_price">{{ __('Box Price') }}</label>
+											<input value="{{ $datalist['box_price'] ?? '' }}" name="box_price" id="box_price" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="form-group">
+											<label for="piece_price">{{ __('Piece Price') }}</label>
+											<input value="{{ $datalist['piece_price'] ?? '' }}" name="piece_price" id="piece_price" type="text" class="form-control">
 										</div>
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-lg-6">
 										<div class="form-group">
-											<label for="storeid">{{ __('Store') }}<span class="red">*</span></label>
+											<label for="storeid">{{ __('Store') }}</label>
 											<select name="storeid" id="storeid" class="chosen-select form-control">
+											<option value="0" {{ (int) $datalist['user_id'] === 0 ? 'selected=selected' : '' }}>{{ __('No Store') }}</option>
 											@foreach($storeList as $row)
 												<option {{ $row->id == $datalist['user_id'] ? "selected=selected" : '' }} value="{{ $row->id }}">
 													{{ $row->shop_name }}
@@ -139,18 +144,7 @@
 											</select>
 										</div>
 									</div>
-									<div class="col-lg-6">
-										<div class="form-group">
-											<label for="variation_size">{{ __('Unit') }}<span class="red">*</span></label>
-											<select name="variation_size" id="variation_size" class="chosen-select form-control">
-											@foreach($unitlist as $row)
-												<option {{ $row->name == $datalist['variation_size'] ? "selected=selected" : '' }} value="{{ $row->name }}">
-													{{ $row->name }}
-												</option>
-											@endforeach
-											</select>
-										</div>
-									</div>
+									<div class="col-lg-6"></div>
 								</div>
 								
 								<div class="row">

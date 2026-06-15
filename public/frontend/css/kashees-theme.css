@@ -560,7 +560,54 @@ a {
 .tp-menu .main-menu .mega-menu ul li.mega-title {
 	color: var(--k-ink) !important;
 	font-family: var(--k-font-head);
-	font-weight: 600;
+	font-weight: 700;
+	font-size: 15px;
+	padding: 0 0 14px !important;
+	margin-bottom: 6px !important;
+	position: relative;
+}
+
+.tp-menu .main-menu .mega-menu ul li.mega-title::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	max-width: 56px;
+	height: 3px;
+	background: var(--k-ink) !important;
+}
+
+/* Shop mega menu — two-column Kashee's-style panel */
+.tp-menu ul li .mega-menu {
+	padding: 28px 20px 24px !important;
+	border-radius: 0 0 12px 12px !important;
+	top: 100% !important;
+}
+
+.tp-menu ul li:not(.tp-static) .mega-menu {
+	left: 0;
+	transform: none;
+}
+
+.tp-menu ul li .mega-menu ul.megafixed-col-2,
+.tp-menu ul li .mega-menu.mega-full ul.mega-col-2 {
+	width: 50% !important;
+	padding: 0 18px !important;
+	box-sizing: border-box;
+}
+
+.tp-menu ul li .mega-menu ul li:not(.mega-title) a {
+	padding: 9px 0 !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	line-height: 1.4;
+	display: block;
+}
+
+.tp-menu .main-menu > li:hover > a.tp-updown::after {
+	width: 70%;
+	left: 15%;
 }
 
 /* Browse-categories flyout list */
@@ -995,29 +1042,70 @@ a {
 	color: #fff !important;
 }
 
-.item-card .item-cart-list {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0;
+.item-card .item-card-bottom a.add-to-cart {
+	float: none !important;
 }
 
+.item-card .item-card-bottom ul.item-cart-list,
+.item-card .item-cart-list {
+	display: flex !important;
+	align-items: center;
+	gap: 6px;
+	margin: 0 !important;
+	padding: 0;
+	list-style: none;
+	float: none !important;
+}
+
+.item-card .item-card-bottom ul.item-cart-list li,
+.item-card .item-cart-list li {
+	float: none !important;
+	list-style: none;
+}
+
+/* Reset legacy icon-circle styles on <i> — button look lives on <a> only */
+.item-card .item-card-bottom ul.item-cart-list li a i,
+.item-card .item-cart-list li a i {
+	width: auto !important;
+	height: auto !important;
+	line-height: 1 !important;
+	font-size: 16px !important;
+	display: inline !important;
+	background: none !important;
+	color: inherit !important;
+	border-radius: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.item-card .item-card-bottom ul.item-cart-list li a,
 .item-card .item-cart-list li a {
 	width: 38px;
 	height: 38px;
 	border-radius: 50%;
-	display: inline-flex;
+	display: inline-flex !important;
 	align-items: center;
 	justify-content: center;
 	border: 1px solid var(--k-line);
+	background: #fff !important;
 	color: var(--k-ink) !important;
 	font-size: 16px;
 	transition: all 0.2s ease;
+	text-decoration: none;
+	flex-shrink: 0;
+	overflow: hidden;
 }
 
+.item-card .item-card-bottom ul.item-cart-list li a:hover,
 .item-card .item-cart-list li a:hover {
 	background: var(--k-pink) !important;
 	border-color: var(--k-pink) !important;
+	color: #fff !important;
+}
+
+.item-card .item-card-bottom ul.item-cart-list li a:hover i,
+.item-card .item-cart-list li a:hover i {
+	background: none !important;
 	color: #fff !important;
 }
 
@@ -1293,9 +1381,13 @@ a {
 	color: var(--k-pink) !important;
 }
 
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
+.item-desc {
+	color: var(--k-muted);
+	font-size: 13px;
+	line-height: 1.5;
+	margin: 6px 0 10px;
+	min-height: 40px;
+}
 @media (max-width: 991px) {
 	.section { padding: 44px 0; }
 	.section-heading h2 { font-size: 26px !important; }
@@ -1305,4 +1397,17 @@ a {
 @media (max-width: 575px) {
 	.item-card .item-card-bottom .add-to-cart { font-size: 12px; padding: 9px 10px; }
 	.featured-categories .featured-card .featured-title { padding: 10px 8px 14px !important; }
+}
+
+/* Product detail — main image fills slider container */
+.product-details-slider .item {
+	display: block;
+	overflow: hidden;
+}
+.product-details-slider .item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	margin: 0;
 }

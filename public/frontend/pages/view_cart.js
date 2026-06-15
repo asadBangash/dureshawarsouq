@@ -29,9 +29,7 @@ function onViewCartData() {
 	});
 }
 
-function onRemoveToCart(id) {
-	var rowid = $("#removetoviewcart_"+id).data('id');
-
+function onRemoveToCart(rowid) {
 	$.ajax({
 		type : 'GET',
 		url: base_url + '/frontend/remove_to_cart/'+rowid,
@@ -43,7 +41,7 @@ function onRemoveToCart(id) {
 
 			if (msgType == "success") {
 				onSuccessMsg(msg);
-				$('#row_delete_'+id).remove();
+				$('#row_delete_'+rowid).remove();
 			} else {
 				onErrorMsg(msg);
 			}

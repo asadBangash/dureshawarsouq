@@ -29,8 +29,12 @@
 					</div>
 					<span class="rating-count">({{ $row->TotalReview }})</span>
 				</div>
-				<div class="item-sold">
-					{{ __('Sold By') }} <a href="{{ route('frontend.stores', [$row->seller_id, str_slug($row->shop_url)]) }}">{{ str_limit($row->shop_name) }}</a>
+				<div class="item-desc">
+					@if(!empty($row->short_desc))
+						{{ str_limit($row->short_desc, 90) }}
+					@elseif(!empty($row->description))
+						{{ str_limit(strip_tags($row->description), 90) }}
+					@endif
 				</div>
 				<div class="item-pric-card">
 					@if($row->sale_price != '')

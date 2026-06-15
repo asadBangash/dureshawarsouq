@@ -55,10 +55,13 @@ class ProductCategoryController extends Controller
 		}
 		
 		$datalist = DB::table('products')
-			->join('users', 'products.user_id', '=', 'users.id')
+			->leftJoin('users', 'products.user_id', '=', 'users.id')
 			->select('products.*', 'users.shop_name', 'users.id as seller_id', 'users.shop_url')
 			->where('products.is_publish', '=', 1)
-			->where('users.status_id', '=', 1)
+			->where(function ($query) {
+				$query->where('products.user_id', 0)
+					->orWhere('users.status_id', '=', 1);
+			})
 			->where('products.cat_id', '=', $id)
 			->orderBy('products.id','desc')
 			->paginate($num);
@@ -122,20 +125,26 @@ class ProductCategoryController extends Controller
 		if($request->ajax()){
 			if($max_price !=''){
 				$datalist = DB::table('products')
-					->join('users', 'products.user_id', '=', 'users.id')
+					->leftJoin('users', 'products.user_id', '=', 'users.id')
 					->select('products.*', 'users.shop_name', 'users.id as seller_id', 'users.shop_url')
 					->where('products.is_publish', '=', 1)
-					->where('users.status_id', '=', 1)
+					->where(function ($query) {
+						$query->where('products.user_id', 0)
+							->orWhere('users.status_id', '=', 1);
+					})
 					->where('products.cat_id', '=', $id)
 					->whereBetween('products.sale_price', [$min_price, $max_price])
 					->orderBy('products.'.$field_name, $order_name)
 					->paginate($num);
 			}else{
 				$datalist = DB::table('products')
-					->join('users', 'products.user_id', '=', 'users.id')
+					->leftJoin('users', 'products.user_id', '=', 'users.id')
 					->select('products.*', 'users.shop_name', 'users.id as seller_id', 'users.shop_url')
 					->where('products.is_publish', '=', 1)
-					->where('users.status_id', '=', 1)
+					->where(function ($query) {
+						$query->where('products.user_id', 0)
+							->orWhere('users.status_id', '=', 1);
+					})
 					->where('products.cat_id', '=', $id)
 					->orderBy('products.'.$field_name, $order_name)
 					->paginate($num);

@@ -196,6 +196,8 @@
 		var theme_color = "{{ $gtext['theme_color'] }}";
 		var base_url = "{{ url('/') }}";
 		var public_path = "{{ asset('public') }}";
+		var currency_icon = "{{ $gtext['currency_icon'] }}";
+		var currency_position = "{{ $gtext['currency_position'] }}";
 		
 		//Cookie Consent
 		var is_publish_cookie_consent = "{{ $gtext['is_publish_cookie_consent'] }}";

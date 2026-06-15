@@ -317,25 +317,10 @@ config(['cart.tax' => $tax_rate]);
 											@endphp
 											
 											@if($tempSellerId != $row['seller_id'])
-											<tr>
-												<td colspan="2" class="tp_group">
-													<div class="store_logo">
-														<a href="{{ route('frontend.stores', [$row['seller_id'], str_slug($row['store_name'])]) }}">
-															<img src="{{ asset('public/media/'.$row['store_logo']) }}" alt="{{ $row['store_name'] }}" />
-														</a>
-													</div>
-													<div class="store_name">
-														<p><strong>{{ __('Sold By') }}</strong></p>
-														<p><a href="{{ route('frontend.stores', [$row['seller_id'], str_slug($row['store_url'])]) }}">{{ $row['store_name'] }}</a></p>
-													</div>
-												</td>
-											</tr>
-											
 											@php 
 											$tempSellerId=$row['seller_id']; 
 											$SellerCount++;
 											@endphp
-											
 											@endif
 											
 											@if($gtext['currency_position'] == 'left')
