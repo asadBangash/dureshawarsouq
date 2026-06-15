@@ -61,7 +61,12 @@ function glan(){
 function CategoryMenuList(){
 	$lan = glan();
 	
-	$datalist = Pro_category::where('lan', '=', $lan)->where('is_publish', '=', 1)->orderBy('id', 'ASC')->get();
+	$datalist = Pro_category::where('lan', '=', $lan)
+		->where('is_publish', '=', 1)
+		->orderByRaw('CASE WHEN parent_id IS NULL OR parent_id = 0 THEN 0 ELSE 1 END')
+		->orderBy('parent_id', 'ASC')
+		->orderBy('name', 'ASC')
+		->get();
 	$li_List = '';
 	$Path = asset('public/media');
 	$count = 1;
@@ -86,7 +91,12 @@ function CategoryMenuList(){
 function CategoryListForMobile(){
 	$lan = glan();
 	
-	$datalist = Pro_category::where('lan', '=', $lan)->where('is_publish', '=', 1)->orderBy('name','ASC')->get();
+	$datalist = Pro_category::where('lan', '=', $lan)
+		->where('is_publish', '=', 1)
+		->orderByRaw('CASE WHEN parent_id IS NULL OR parent_id = 0 THEN 0 ELSE 1 END')
+		->orderBy('parent_id', 'ASC')
+		->orderBy('name', 'ASC')
+		->get();
 	$li_List = '';
 	foreach($datalist as $row){
 		$id = $row->id;
@@ -135,6 +145,11 @@ function HeaderMenuList($MenuType){
 	$upDownClass = '';
 	$target_window = '';
 	foreach($datalist as $row){
+
+		// Brands menu hidden for now — re-enable when brand catalog is ready.
+		if ($row->item_label === 'Brands') {
+			continue;
+		}
 
 		$menu_id = $row->menu_id;
 		$menu_parent_id = $row->id;
