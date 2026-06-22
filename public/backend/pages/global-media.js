@@ -28,6 +28,7 @@ function onUploadFormPanel() {
 
 function onGlobalMediaModalView() {
 	onUploadListPanel();
+	onGlobalMediaModalDataLoad();
 	$("#tp_media_right").hide();
 	$("#media_select_file").prop("disabled", true);
 	$("ul.media-view li.active").removeClass("active");
@@ -122,13 +123,17 @@ function onMediaModalView(id) {
 function upload_form() {
 	$("#upload-loader").show();
 	
-	var data = new FormData();
-		data.append('FileName', $('#load_attachment')[0].files[0]);
-		data.append('media_type', media_type);
-	var ReaderObj = new FileReader();
-	var imgname  =  $('#load_attachment').val();
-	var size  =  $('#load_attachment')[0].files[0].size;
+	var fileInput = $('#load_attachment')[0];
+	if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+		$("#upload-loader").hide();
+		onErrorMsg('Please choose a file first.');
+		return;
+	}
 
+	var data = new FormData();
+		data.append('FileName', fileInput.files[0]);
+		data.append('media_type', media_type);
+	var imgname  =  $('#load_attachment').val();
 	var ext =  imgname.substr((imgname.lastIndexOf('.') +1));
 	
 	if(ext=='jpg' || ext=='JPG' || ext=='jpeg' || ext=='JPEG' || ext=='png' || ext=='PNG' || ext=='gif' || ext=='ico' || ext=='ICO' || ext=='svg' || ext=='SVG'){
@@ -147,24 +152,31 @@ function upload_form() {
 				var dataList = response;
 				var msgType = dataList.msgType;
 				var msg = dataList.msg;
-				var thumbnail = dataList.thumbnail;
-				var id = dataList.id;
 				
+				$("#upload-loader").hide();
+				$('#load_attachment').val('');
+
 				if (msgType == "success") {
-					
-					$("#upload-loader").hide();
 					onSuccessMsg(msg);
 					onGlobalMediaModalDataLoad();
 				} else {
 					onErrorMsg(msg);
 				}
 			},
-			error: function(){
-				return false;
+			error: function(xhr){
+				$("#upload-loader").hide();
+				$('#load_attachment').val('');
+				var msg = 'Upload failed. Please sign in again or try a smaller JPG/PNG file.';
+				if (xhr.responseJSON && xhr.responseJSON.message) {
+					msg = xhr.responseJSON.message;
+				}
+				onErrorMsg(msg);
 			}				
 		});
 		
 	}else{
+		$("#upload-loader").hide();
+		$('#load_attachment').val('');
 		onErrorMsg(TEXT['Sorry only you can upload jpg, png and gif file type']);
 	}
 }

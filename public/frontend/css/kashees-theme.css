@@ -706,6 +706,18 @@ a {
 	color: #cfcfcf !important;
 }
 
+.footer-widget .contact-desc h5,
+.footer-widget .contact-desc p {
+	font-family: var(--k-font-body);
+	font-weight: 400;
+}
+
+.footer-widget .contact-desc h5 {
+	font-weight: 600;
+	font-size: 14px;
+	margin-bottom: 4px;
+}
+
 .footer-widget ul.widget-list li a {
 	color: #cfcfcf !important;
 	font-family: var(--k-font-body);
@@ -1368,6 +1380,26 @@ a {
 .item-card .deals-countdown-card .deals-countdown .countdown-section {
 	background: var(--k-ink);
 	color: #fff;
+}
+
+/* ==========================================================================
+   CONTACT PAGE
+   ========================================================================== */
+.contact_card .heading {
+	font-family: var(--k-font-head);
+	font-weight: 600;
+}
+
+.contact-info p,
+.contact-info .info .desc span,
+.contact-info .info .desc p,
+.contact-info .info .desc p a {
+	font-family: var(--k-font-body);
+	font-weight: 400;
+}
+
+.contact-info .info .desc span {
+	font-weight: 600;
 }
 
 /* ==========================================================================

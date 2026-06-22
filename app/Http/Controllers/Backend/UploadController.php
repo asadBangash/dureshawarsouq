@@ -12,6 +12,19 @@ use Image;
 
 class UploadController extends Controller
 {
+	private function safeMediaFilename(string $originalName, string $extension): string
+	{
+		$baseName = basename($originalName, '.'.$extension);
+		$safeBaseName = preg_replace('/[^a-zA-Z0-9._-]/', '-', $baseName);
+		$safeBaseName = preg_replace('/-+/', '-', trim((string) $safeBaseName, '-'));
+
+		if ($safeBaseName === '') {
+			$safeBaseName = 'upload';
+		}
+
+		return $safeBaseName.'.'.Str::lower($extension);
+	}
+
 	public function FileUpload(Request $request){
 		
 		$destinationPath = public_path('media');
@@ -19,8 +32,18 @@ class UploadController extends Controller
 		
 		$file = $request->file('FileName');
 
+		if (!$file) {
+			return response()->json([
+				'msgType' => 'error',
+				'msg' => __('No file was uploaded. Check file size limits and try again.'),
+				'FileName' => '',
+			]);
+		}
+
+		$safeOriginalName = $this->safeMediaFilename($file->getClientOriginalName(), $file->getClientOriginalExtension());
+
 		//Display File Name
-		$FileName = $dateTime.'-'.$file->getClientOriginalName();
+		$FileName = $dateTime.'-'.$safeOriginalName;
 		//$FileName = $file->getClientOriginalName();
 		
 		//get file extension
@@ -95,9 +118,19 @@ class UploadController extends Controller
 
 		$file = $request->file('FileName');
 
+		if (!$file) {
+			return response()->json([
+				'msgType' => 'error',
+				'msg' => __('No file was uploaded. Check file size limits and try again.'),
+				'FileName' => '',
+			]);
+		}
+
+		$safeOriginalName = $this->safeMediaFilename($file->getClientOriginalName(), $file->getClientOriginalExtension());
+
 		//Display File Name
-		$FileName = $dateTime.'-'.$file->getClientOriginalName();
-		$ThumFileName = $dateTime.'-'.$width.'x'.$height.'-'.$file->getClientOriginalName();
+		$FileName = $dateTime.'-'.$safeOriginalName;
+		$ThumFileName = $dateTime.'-'.$width.'x'.$height.'-'.$safeOriginalName;
 		//$FileName = $file->getClientOriginalName();
 		
 		//get file extension
@@ -130,10 +163,20 @@ class UploadController extends Controller
 			if(($Filetype == 'gif') || ($Filetype == 'ico') || ($Filetype == 'ICO') || ($Filetype == 'svg') || ($Filetype == 'SVG')){
 				$ThumFileName = $FileName;
 			}else{
-				$img = Image::make($FileRealPath);
-				$img->resize($width, $height, function ($constraint) {
-					$constraint->aspectRatio();
-				})->save($destinationPath.'/'.$ThumFileName);
+				try {
+					$img = Image::make($FileRealPath);
+					$img->resize($width, $height, function ($constraint) {
+						$constraint->aspectRatio();
+					})->save($destinationPath.'/'.$ThumFileName);
+				} catch (\Throwable $e) {
+					return response()->json([
+						'msgType' => 'error',
+						'msg' => __('Image processing failed. Try a JPG or PNG under 5 MB.'),
+						'thumbnail' => '',
+						'large_image' => '',
+						'id' => '',
+					]);
+				}
 			}
 			
 			if($file->move($destinationPath, $FileName)) {
