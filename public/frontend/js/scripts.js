@@ -318,6 +318,7 @@
 		return minPrice + currency_icon + ' - ' + maxPrice + currency_icon;
 	}
 
+    if ($("#slider-range").length) {
     $( "#slider-range" ).slider({
       range: true,
       min: 0,
@@ -334,6 +335,7 @@
 	var minPrice = $( "#slider-range" ).slider( "values", 0);
 	var maxPrice = $( "#slider-range" ).slider( "values", 1);
 	$( "#amount" ).text(formatPriceRange(minPrice, maxPrice));
+    }
 	
 	//Product Setails Slider
 	$('.pd-slider-for').slick({

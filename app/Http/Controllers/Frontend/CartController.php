@@ -18,14 +18,14 @@ class CartController extends Controller
 		$datalist = Product::where('id', $id)->first();
 		$user = $datalist['user_id'] > 0 ? User::where('id', $datalist['user_id'])->first() : null;
 
-		$unit = strtolower($request->query('unit', 'box'));
-		if ($unit === 'piece') {
-			$price = $datalist['piece_price'];
-			$unitLabel = 'Piece';
-		} else {
+		$unit = strtolower($request->query('unit', 'piece'));
+		if ($unit === 'box') {
 			$price = $datalist['box_price'];
 			$unitLabel = 'Box';
-			$unit = 'box';
+		} else {
+			$price = $datalist['piece_price'] ?? $datalist['sale_price'];
+			$unitLabel = 'Piece';
+			$unit = 'piece';
 		}
 
 		if ($price === null || $price === '') {
@@ -209,7 +209,7 @@ class CartController extends Controller
 		$data['id'] = $datalist['id'];
 		$data['name'] = $datalist['title'];
 		$data['qty'] = 1;
-		$data['price'] = $datalist['box_price'] ?? $datalist['piece_price'] ?? $datalist['sale_price'];
+		$data['price'] = $datalist['piece_price'] ?? $datalist['sale_price'] ?? $datalist['box_price'];
 		$data['weight'] = 0;
 		$data['options'] = array();
 		$data['options']['thumbnail'] = $datalist['f_thumbnail'];

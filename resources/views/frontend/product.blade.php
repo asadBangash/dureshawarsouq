@@ -92,11 +92,7 @@
 						<div class="pr_extra"><strong>{{ __('Sold By') }}:</strong> <a href="{{ route('frontend.stores', [$data->seller_id, str_slug($data->shop_url)]) }}">{{ $data->shop_name }}</a></div>
 						@endif
 						@php
-							$hasBoxPrice = $data->box_price !== null && $data->box_price !== '';
-							$hasPiecePrice = $data->piece_price !== null && $data->piece_price !== '';
-							$defaultUnit = $hasBoxPrice ? 'box' : ($hasPiecePrice ? 'piece' : 'box');
-							$defaultPrice = $hasBoxPrice ? $data->box_price : ($hasPiecePrice ? $data->piece_price : null);
-							$piecesPerBox = $data->pieces_per_box;
+							$defaultPrice = $data->piece_price ?? $data->sale_price ?? $data->box_price;
 						@endphp
 						@if($defaultPrice !== null)
 						<div class="product_price">
@@ -119,23 +115,7 @@
 							@endif
 						</div>
 						@endif
-						@if($hasBoxPrice || $hasPiecePrice)
-						<div class="pr_widget">
-							<label class="widget-title">{{ __('Order By') }}</label>
-							@if($piecesPerBox)
-							<div class="pr_extra pieces-per-box-note">{{ __('1 Box contains') }} {{ $piecesPerBox }} {{ __('pieces') }}</div>
-							@endif
-							<ul class="widget-size product-unit-selector">
-								@if($hasBoxPrice)
-								<li class="unit-option {{ $defaultUnit === 'box' ? 'active' : '' }}" data-unit="box" data-price="{{ $data->box_price }}"><a href="javascript:void(0);">{{ __('Box') }}@if($piecesPerBox) ({{ $piecesPerBox }} {{ __('pcs') }})@endif</a></li>
-								@endif
-								@if($hasPiecePrice)
-								<li class="unit-option {{ $defaultUnit === 'piece' ? 'active' : '' }}" data-unit="piece" data-price="{{ $data->piece_price }}"><a href="javascript:void(0);">{{ __('Piece') }}</a></li>
-								@endif
-							</ul>
-							<input type="hidden" id="selected_unit" value="{{ $defaultUnit }}">
-						</div>
-						@endif
+						<input type="hidden" id="selected_unit" value="piece">
 						<div class="pr_quantity">
 							<label for="quantity">{{ __('Quantity') }}</label>
 							<input name="quantity" id="quantity" type="number" min="1" max="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" value="1">

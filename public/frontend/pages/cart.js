@@ -17,7 +17,7 @@ $(function () {
 
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
-		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'box';
+		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'piece';
 
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
@@ -59,7 +59,7 @@ $(function () {
 
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
-		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'box';
+		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'piece';
 		
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
