@@ -11,7 +11,13 @@ use Illuminate\Support\Facades\Hash;
 
 class ProductReviewsSeeder extends Seeder
 {
-    protected int $reviewsPerProduct = 20;
+    // Distinct reviewer accounts to reuse across products
+    protected int $reviewerPoolSize = 120;
+
+    // Each product gets a random number of reviews within this range
+    protected int $minReviews = 22;
+
+    protected int $maxReviews = 78;
 
     protected array $uaeNames = [
         'Fatima Al Maktoum', 'Aisha Hassan', 'Mariam Al Nuaimi', 'Sara Al Ketbi', 'Layla Rahman',
@@ -101,16 +107,21 @@ class ProductReviewsSeeder extends Seeder
             return;
         }
 
-        $neededUsers = $products->count() * $this->reviewsPerProduct;
-
         DB::table('reviews')->whereIn('item_id', $products->pluck('id'))->delete();
 
-        $reviewerIds = $this->ensureReviewerUsers($neededUsers);
-        $userIndex = 0;
+        $reviewerIds = $this->ensureReviewerUsers($this->reviewerPoolSize);
         $totalReviews = 0;
 
         foreach ($products as $product) {
-            for ($i = 0; $i < $this->reviewsPerProduct; $i++) {
+            // Random, natural-looking review count per product (e.g. 24, 30, 43, 70)
+            $reviewCount = random_int($this->minReviews, $this->maxReviews);
+
+            // Use distinct reviewers within a single product
+            $pool = $reviewerIds;
+            shuffle($pool);
+            $poolSize = count($pool);
+
+            for ($i = 0; $i < $reviewCount; $i++) {
                 $city = $this->uaeCities[array_rand($this->uaeCities)];
                 $type = $this->productTypeLabel($product->title);
 
@@ -128,19 +139,20 @@ class ProductReviewsSeeder extends Seeder
 
                 Review::create([
                     'item_id' => $product->id,
-                    'user_id' => $reviewerIds[$userIndex],
+                    'user_id' => $pool[$i % $poolSize],
                     'rating' => $rating,
                     'comments' => $comment,
                     'created_at' => $reviewDate,
                     'updated_at' => $reviewDate,
                 ]);
 
-                $userIndex++;
                 $totalReviews++;
             }
+
+            $this->command?->info("Product #{$product->id} ({$product->title}): {$reviewCount} reviews.");
         }
 
-        $this->command?->info("Seeded {$totalReviews} reviews ({$this->reviewsPerProduct} each) for {$products->count()} products.");
+        $this->command?->info("Seeded {$totalReviews} reviews across {$products->count()} products (random {$this->minReviews}-{$this->maxReviews} each).");
     }
 
     protected function ensureReviewerUsers(int $count): array

@@ -135,6 +135,12 @@ $gtax = getTax();
 											({{ $row->options->pieces_per_box }} {{ __('pcs') }})
 											@endif
 										</span>
+										@if(!empty($row->options->shade))
+										<span class="pro-shade">
+											<span class="pro-shade-swatch" style="background: {{ $row->options->shade_color ?? '#cccccc' }};"></span>
+											{{ $row->options->shade }}
+										</span>
+										@endif
 									</td>
 									<td class="text-center pro-price-w" data-title="{{ __('Price') }}:">
 										<span class="pro-price"><span class="pro-price">{{ $price }}</span></span>

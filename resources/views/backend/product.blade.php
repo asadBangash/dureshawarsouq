@@ -130,6 +130,46 @@
 										</div>
 									</div>
 								</div>
+
+								@php
+									$shadesData = $datalist['shades'] ?? null;
+									if (is_string($shadesData)) {
+										$shadesData = json_decode($shadesData, true);
+									}
+									$shadesData = is_array($shadesData) ? $shadesData : [];
+								@endphp
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="form-group">
+											<label>{{ __('Shades / Colours') }} <em style="font-weight:400;">({{ __('optional') }})</em></label>
+											<p class="mb-2" style="color:#888;font-size:13px;">{{ __('Add selectable colour shades. Price per shade is optional — leave it blank to use the product price.') }}</p>
+											<div id="shades_wrapper">
+												@forelse($shadesData as $shade)
+												<div class="row shade-row align-items-center mb-2">
+													<div class="col-lg-4 col-md-4">
+														<input type="text" name="shade_name[]" class="form-control" placeholder="{{ __('Shade name e.g. Ruby Red') }}" value="{{ $shade['name'] ?? '' }}">
+													</div>
+													<div class="col-lg-3 col-md-3">
+														<div class="d-flex align-items-center">
+															<input type="color" name="shade_color[]" class="form-control" style="max-width:60px;padding:4px;" value="{{ $shade['color'] ?? '#cccccc' }}">
+															<span style="margin-left:8px;color:#888;font-size:12px;">{{ __('Colour') }}</span>
+														</div>
+													</div>
+													<div class="col-lg-3 col-md-3">
+														<input type="number" step="0.01" min="0" name="shade_price[]" class="form-control" placeholder="{{ __('Price (optional)') }}" value="{{ isset($shade['price']) && $shade['price'] !== null && $shade['price'] !== '' ? $shade['price'] : '' }}">
+													</div>
+													<div class="col-lg-2 col-md-2">
+														<a href="javascript:void(0);" class="btn danger-btn shade-remove"><i class="fa fa-trash"></i></a>
+													</div>
+												</div>
+												@empty
+												@endforelse
+											</div>
+											<a href="javascript:void(0);" id="add_shade" class="btn blue-btn mt-2"><i class="fa fa-plus"></i> {{ __('Add Shade') }}</a>
+										</div>
+									</div>
+								</div>
+
 								<div class="row">
 									<div class="col-lg-6">
 										<div class="form-group">
@@ -245,6 +285,20 @@ if(f_thumbnail != ''){
 var TEXT = [];
 	TEXT['Select Category'] = "{{ __('Select Category') }}";
 
+function shadeRowTemplate(){
+	return '<div class="row shade-row align-items-center mb-2">'+
+		'<div class="col-lg-4 col-md-4"><input type="text" name="shade_name[]" class="form-control" placeholder="{{ __('Shade name e.g. Ruby Red') }}"></div>'+
+		'<div class="col-lg-3 col-md-3"><div class="d-flex align-items-center"><input type="color" name="shade_color[]" class="form-control" style="max-width:60px;padding:4px;" value="#cccccc"><span style="margin-left:8px;color:#888;font-size:12px;">{{ __('Colour') }}</span></div></div>'+
+		'<div class="col-lg-3 col-md-3"><input type="number" step="0.01" min="0" name="shade_price[]" class="form-control" placeholder="{{ __('Price (optional)') }}"></div>'+
+		'<div class="col-lg-2 col-md-2"><a href="javascript:void(0);" class="btn danger-btn shade-remove"><i class="fa fa-trash"></i></a></div>'+
+	'</div>';
+}
+$(document).on('click', '#add_shade', function(){
+	$('#shades_wrapper').append(shadeRowTemplate());
+});
+$(document).on('click', '.shade-remove', function(){
+	$(this).closest('.shade-row').remove();
+});
 </script>
 <link href="{{asset('public/backend/editor/summernote-lite.min.css')}}" rel="stylesheet">
 <script src="{{asset('public/backend/editor/summernote-lite.min.js')}}"></script>

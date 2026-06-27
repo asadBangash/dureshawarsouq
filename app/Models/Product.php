@@ -36,6 +36,7 @@ class Product extends Model
         'collection_id',
         'label_id',
         'variation_color',
+        'shades',
         'variation_size',
         'tax_id',
         'is_featured',
@@ -46,5 +47,9 @@ class Product extends Model
         'og_image',
         'og_description',
         'og_keywords',
+    ];
+
+    protected $casts = [
+        'shades' => 'array',
     ];
 }

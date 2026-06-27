@@ -61,7 +61,7 @@
 	<section class="inner-section inner-section-bg">
 		<div class="container">
 			<div class="row">
-				<div class="col-xl-5">
+				<div class="col-xl-4 col-lg-6">
 					<div class="product-details-slider pd-slider-for">
 						@if(count($pro_images)>0)
 						@foreach ($pro_images as $key => $row)
@@ -85,15 +85,34 @@
 						@endif
 					</div>
 				</div>
-				<div class="col-xl-7">
+				@php
+					$defaultPrice = $data->piece_price ?? $data->sale_price ?? $data->box_price;
+					$shades = is_string($data->shades ?? null) ? json_decode($data->shades, true) : ($data->shades ?? null);
+					$shades = is_array($shades) ? $shades : [];
+					$hasSeller = !empty($data->seller_id) && !empty($data->shop_name) && !empty($data->shop_url);
+				@endphp
+				<div class="col-xl-5 col-lg-6">
 					<div class="pr_details">
-						<h4 class="product_title">{{ $data->title }}</h4>
-						@if(!empty($data->seller_id) && !empty($data->shop_name) && !empty($data->shop_url))
-						<div class="pr_extra"><strong>{{ __('Sold By') }}:</strong> <a href="{{ route('frontend.stores', [$data->seller_id, str_slug($data->shop_url)]) }}">{{ $data->shop_name }}</a></div>
+						@if($data->brandname != '')
+						<a href="{{ route('frontend.brand', [$data->brand_id, str_slug($data->brandname)]) }}" class="pr_brand_name">{{ $data->brandname }} <i class="bi bi-patch-check-fill"></i></a>
 						@endif
-						@php
-							$defaultPrice = $data->piece_price ?? $data->sale_price ?? $data->box_price;
-						@endphp
+
+						<h4 class="product_title">{{ $data->title }}</h4>
+
+						<div class="pr_rating_row">
+							<div class="rating-wrap">
+								<div class="stars-outer">
+									<div class="stars-inner" style="width:{{ $data->ReviewPercentage }}%;"></div>
+								</div>
+								<span class="rating-count">{{ $data->TotalReview }} {{ __('Ratings') }}</span>
+							</div>
+							@if($data->is_stock == 1 && $data->stock_status_id == 1)
+							<span class="pr_stock_pill instock"><i class="bi bi-check-circle-fill"></i> {{ __('In Stock') }}</span>
+							@elseif($data->is_stock == 1)
+							<span class="pr_stock_pill stockout"><i class="bi bi-x-circle-fill"></i> {{ __('Out Of Stock') }}</span>
+							@endif
+						</div>
+
 						@if($defaultPrice !== null)
 						<div class="product_price">
 							@if($gtext['currency_position'] == 'left')
@@ -115,34 +134,59 @@
 							@endif
 						</div>
 						@endif
+
+						@if($data->short_desc != '')
+						<p class="pr_short_desc">{{ $data->short_desc }}</p>
+						@endif
+
 						<input type="hidden" id="selected_unit" value="piece">
-						<div class="pr_quantity">
-							<label for="quantity">{{ __('Quantity') }}</label>
-							<input name="quantity" id="quantity" type="number" min="1" max="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" value="1">
+
+						@if(count($shades) > 0)
+						<div class="pr_widget pr_shades_widget">
+							<label class="widget-title">{{ __('Colour') }}: <span id="selected_shade_label" class="selected-shade-name"></span></label>
+							<ul class="product-shades">
+								@foreach($shades as $sIndex => $shade)
+								<li class="shade-option {{ $sIndex === 0 ? 'active' : '' }}"
+									data-name="{{ $shade['name'] ?? '' }}"
+									data-price="{{ isset($shade['price']) && $shade['price'] !== null && $shade['price'] !== '' ? $shade['price'] : '' }}"
+									title="{{ $shade['name'] ?? '' }}">
+									<span class="shade-swatch" style="background: {{ $shade['color'] ?? '#cccccc' }};"></span>
+									<span class="shade-name">{{ str_limit($shade['name'] ?? '', 12) }}</span>
+								</li>
+								@endforeach
+							</ul>
 						</div>
-						<div class="pr_buy_cart">
-							<a class="btn theme-btn cart product_addtocart" data-id="{{ $data->id }}" data-stockqty="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" href="javascript:void(0);">{{ __('Add To Cart') }}</a>
-							<a class="btn theme-btn cart product_buy_now" data-id="{{ $data->id }}" data-stockqty="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" href="javascript:void(0);">{{ __('Buy Now') }}</a>
-							<a class="btn theme-btn cart wishlist addtowishlist" data-id="{{ $data->id }}" href="javascript:void(0);"><i class="bi bi-heart-fill"></i></a>
+						<input type="hidden" id="selected_shade" value="{{ $shades[0]['name'] ?? '' }}">
+						@else
+						<input type="hidden" id="selected_shade" value="">
+						@endif
+
+						<div class="pr_delivery_box">
+							<div class="pr_delivery_head"><i class="bi bi-truck"></i> {{ __('Delivery Information') }}</div>
+							<ul class="pr_delivery_list">
+								<li><i class="bi bi-geo-alt"></i> {{ __('Fast delivery across the country') }}</li>
+								<li><i class="bi bi-cash-coin"></i> {{ __('Cash on delivery available') }}</li>
+								<li><i class="bi bi-arrow-repeat"></i> {{ __('Easy 7-day returns') }}</li>
+							</ul>
 						</div>
-						
-						@if($data->is_stock == 1)
-							@if($data->stock_status_id == 1)
-							<div class="pr_extra"><strong>{{ __('Availability') }}:</strong><span class="instock">{{ $data->stock_qty }} {{ __('In Stock') }}</span></div>
-							@else
-							<div class="pr_extra"><strong>{{ __('Availability') }}:</strong><span class="stockout">{{ __('Out Of Stock') }}</span></div>
+
+						<div class="pr_meta_list">
+							@if($data->is_stock == 1)
+								@if($data->stock_status_id == 1)
+								<div class="pr_extra"><strong>{{ __('Availability') }}:</strong><span class="instock">{{ $data->stock_qty }} {{ __('In Stock') }}</span></div>
+								@else
+								<div class="pr_extra"><strong>{{ __('Availability') }}:</strong><span class="stockout">{{ __('Out Of Stock') }}</span></div>
+								@endif
+								@if($data->sku != '')
+								<div class="pr_extra"><strong>{{ __('SKU') }}:</strong>  {{ $data->sku }}</div>
+								@endif
 							@endif
-						@endif
-						@if($data->is_stock == 1)
-							@if($data->sku != '')
-							<div class="pr_extra"><strong>{{ __('SKU') }}:</strong>  {{ $data->sku }}</div>
+							@if($data->brandname != '')
+							<div class="pr_extra"><strong>{{ __('Brand') }}: </strong><a href="{{ route('frontend.brand', [$data->brand_id, str_slug($data->brandname)]) }}"> {{ $data->brandname }}</a></div>
 							@endif
-						@endif
-						@if($data->brandname != '')
-						<div class="pr_extra"><strong>{{ __('Brand') }}: </strong><a href="{{ route('frontend.brand', [$data->brand_id, str_slug($data->brandname)]) }}"> {{ $data->brandname }}</a></div>
-						@endif
-						
-						<div class="pr_widget">
+						</div>
+
+						<div class="pr_widget pr_share_widget">
 							<label class="widget-title">{{ __('Share this') }}</label>
 							<div class="social-media">
 								<a href="https://www.facebook.com/sharer/sharer.php?u={{ route('frontend.product', [$data->id, $data->slug]) }}" target="_blank"><i class="bi bi-facebook"></i></a>
@@ -153,7 +197,123 @@
 						</div>
 					</div>
 				</div>
+				<div class="col-xl-3 col-lg-12">
+					<div class="pr_buybox">
+						@if($hasSeller)
+						<div class="pr_buybox_seller">
+							<div class="seller-label">{{ __('Sold By') }}</div>
+							<a href="{{ route('frontend.stores', [$data->seller_id, str_slug($data->shop_url)]) }}" class="seller-name"><i class="bi bi-shop"></i> {{ $data->shop_name }}</a>
+						</div>
+						@endif
+
+						<div class="pr_buybox_qty">
+							<label for="quantity">{{ __('Quantity') }}</label>
+							<input name="quantity" id="quantity" type="number" min="1" max="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" value="1">
+						</div>
+
+						<a class="btn theme-btn cart product_addtocart" data-id="{{ $data->id }}" data-stockqty="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" href="javascript:void(0);"><i class="bi bi-cart-plus"></i> {{ __('Add To Cart') }}</a>
+						<a class="btn theme-btn cart buynow product_buy_now" data-id="{{ $data->id }}" data-stockqty="{{ $data->is_stock == 1 ? $data->stock_qty : 999 }}" href="javascript:void(0);">{{ __('Buy Now') }}</a>
+						<a class="btn pr_wishlist_btn addtowishlist" data-id="{{ $data->id }}" href="javascript:void(0);"><i class="bi bi-heart"></i> {{ __('Add to Wishlist') }}</a>
+
+						<ul class="pr_buybox_notes">
+							<li><i class="bi bi-shield-lock"></i> {{ __('Secure Payments') }}</li>
+							<li><i class="bi bi-patch-check"></i> {{ __('100% Authentic Products') }}</li>
+							<li><i class="bi bi-arrow-repeat"></i> {{ __('Easy Returns') }}</li>
+						</ul>
+					</div>
+
+					@if(count($deals_products) > 0)
+					<div class="pr_deals_card">
+						<div class="pr_deals_head">
+							<i class="bi bi-fire"></i> {{ __('Deals & Offers') }}
+						</div>
+						<ul class="pr_deals_list">
+							@foreach($deals_products as $deal)
+							@php
+								$dealPrice = $deal->piece_price ?? $deal->sale_price;
+								$dealDiscount = 0;
+								if($deal->is_discount == 1 && $deal->old_price && $dealPrice){
+									$dealDiscount = number_format((($deal->old_price - $dealPrice)*100)/$deal->old_price);
+								}
+							@endphp
+							<li>
+								<a href="{{ route('frontend.product', [$deal->id, $deal->slug]) }}" class="pr_deal_item">
+									<span class="pr_deal_thumb">
+										<img src="{{ asset('public/media/'.$deal->f_thumbnail) }}" alt="{{ $deal->title }}" />
+										@if($dealDiscount > 0)
+										<span class="pr_deal_badge">-{{ $dealDiscount }}%</span>
+										@endif
+									</span>
+									<span class="pr_deal_info">
+										<span class="pr_deal_title">{{ str_limit($deal->title, 40) }}</span>
+										<span class="pr_deal_price">
+											@if($gtext['currency_position'] == 'left')
+											<span class="pr_deal_new">{{ $gtext['currency_icon'] }}{{ number_format($dealPrice, 2) }}</span>
+											@if($dealDiscount > 0)<span class="pr_deal_old">{{ $gtext['currency_icon'] }}{{ number_format($deal->old_price) }}</span>@endif
+											@else
+											<span class="pr_deal_new">{{ number_format($dealPrice, 2) }}{{ $gtext['currency_icon'] }}</span>
+											@if($dealDiscount > 0)<span class="pr_deal_old">{{ number_format($deal->old_price) }}{{ $gtext['currency_icon'] }}</span>@endif
+											@endif
+										</span>
+									</span>
+								</a>
+							</li>
+							@endforeach
+						</ul>
+					</div>
+					@endif
+				</div>
 			</div>
+
+			@php
+				$fbtSource = (isset($related_products) && count($related_products) > 0) ? $related_products : (isset($category_products) ? $category_products : []);
+				$fbtItems = collect($fbtSource)->take(3);
+			@endphp
+			@if($fbtItems->count() > 0)
+			<!-- Frequently Bought Together -->
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="fbt_section">
+						<h3 class="fbt_title">{{ __('Frequently Bought Together') }}</h3>
+						<div class="fbt_wrap">
+							<div class="fbt_items">
+								<div class="fbt_item">
+									<label class="fbt_check_label">
+										<input type="checkbox" class="fbt_check" data-id="{{ $data->id }}" data-price="{{ $defaultPrice !== null ? $defaultPrice : 0 }}" checked disabled>
+										<span class="fbt_thumb"><img src="{{ asset('public/media/'.$data->f_thumbnail) }}" alt="{{ $data->title }}"></span>
+									</label>
+									<span class="fbt_name">{{ str_limit($data->title, 30) }}</span>
+									<span class="fbt_price">
+										@if($gtext['currency_position'] == 'left'){{ $gtext['currency_icon'] }}{{ number_format($defaultPrice ?? 0, 2) }}@else{{ number_format($defaultPrice ?? 0, 2) }}{{ $gtext['currency_icon'] }}@endif
+									</span>
+								</div>
+								@foreach($fbtItems as $fbt)
+								@php $fbtPrice = $fbt->piece_price ?? $fbt->sale_price ?? 0; @endphp
+								<span class="fbt_plus">+</span>
+								<div class="fbt_item">
+									<label class="fbt_check_label">
+										<input type="checkbox" class="fbt_check" data-id="{{ $fbt->id }}" data-price="{{ $fbtPrice }}" checked>
+										<a href="{{ route('frontend.product', [$fbt->id, $fbt->slug]) }}" class="fbt_thumb"><img src="{{ asset('public/media/'.$fbt->f_thumbnail) }}" alt="{{ $fbt->title }}"></a>
+									</label>
+									<a href="{{ route('frontend.product', [$fbt->id, $fbt->slug]) }}" class="fbt_name">{{ str_limit($fbt->title, 30) }}</a>
+									<span class="fbt_price">
+										@if($gtext['currency_position'] == 'left'){{ $gtext['currency_icon'] }}{{ number_format($fbtPrice, 2) }}@else{{ number_format($fbtPrice, 2) }}{{ $gtext['currency_icon'] }}@endif
+									</span>
+								</div>
+								@endforeach
+							</div>
+							<div class="fbt_summary">
+								<div class="fbt_total_row">
+									<span class="fbt_total_label">{{ __('Total price') }}:</span>
+									<span class="fbt_total_price" id="fbt_total_price">0</span>
+								</div>
+								<a href="javascript:void(0);" id="fbt_add_all" class="btn theme-btn cart">{{ __('Add Selected To Cart') }}</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@endif
 			
 			<!-- Product Description & Reviews -->
 			<div class="row">
@@ -391,6 +551,7 @@
 	var is_stock_status = "{{ $data->stock_status_id }}";
 	var currency_position = "{{ $gtext['currency_position'] }}";
 	var currency_icon = "{{ $gtext['currency_icon'] }}";
+	var base_product_price = {{ $defaultPrice !== null ? $defaultPrice : 0 }};
 	
 var TEXT = [];
 	TEXT['Please enter quantity.'] = "{{ __('Please enter quantity.') }}";

@@ -370,6 +370,27 @@ class ProductsController extends Controller
 		}
 		$variation_size = implode(',', $units);
 		$sale_price = $box_price ?? $piece_price;
+
+		// Build optional shades list
+		$shadeNames = $request->input('shade_name', []);
+		$shadeColors = $request->input('shade_color', []);
+		$shadePrices = $request->input('shade_price', []);
+		$shades = array();
+		if (is_array($shadeNames)) {
+			foreach ($shadeNames as $i => $name) {
+				$name = trim((string) $name);
+				if ($name === '') {
+					continue;
+				}
+				$priceVal = $shadePrices[$i] ?? '';
+				$shades[] = array(
+					'name' => $name,
+					'color' => $shadeColors[$i] ?? '#cccccc',
+					'price' => ($priceVal === '' || $priceVal === null) ? null : (float) $priceVal,
+				);
+			}
+		}
+		$shades = !empty($shades) ? json_encode($shades) : null;
 		
 		$validator_array = array(
 			'product_name' => $request->input('title'),
@@ -471,6 +492,7 @@ class ProductsController extends Controller
 			'box_price' => $box_price,
 			'piece_price' => $piece_price,
 			'pieces_per_box' => $pieces_per_box,
+			'shades' => $shades,
 			'lan' => $lan
 		);
 		

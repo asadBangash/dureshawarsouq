@@ -18,6 +18,7 @@ $(function () {
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
 		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'piece';
+		var shade = ($("#selected_shade").length && $("#selected_shade").val()) ? $("#selected_shade").val() : '';
 
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
@@ -38,7 +39,7 @@ $(function () {
 		
 		$.ajax({
 			type : 'GET',
-			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit,
+			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit+'&shade='+encodeURIComponent(shade),
 			dataType:"json",
 			success: function (response) {
 				var msgType = response.msgType;
@@ -60,6 +61,7 @@ $(function () {
 		var id = $(this).data('id');
 		var qty = $("#quantity").val();
 		var unit = ($("#selected_unit").length && $("#selected_unit").val()) ? $("#selected_unit").val() : 'piece';
+		var shade = ($("#selected_shade").length && $("#selected_shade").val()) ? $("#selected_shade").val() : '';
 		
 		if((qty == undefined) || (qty == '') || (qty <= 0)){
 			onErrorMsg(TEXT['Please enter quantity.']);
@@ -80,7 +82,7 @@ $(function () {
 		
 		$.ajax({
 			type : 'GET',
-			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit,
+			url: base_url + '/frontend/add_to_cart/'+id+'/'+qty+'?unit='+unit+'&shade='+encodeURIComponent(shade),
 			dataType:"json",
 			success: function (response) {
 				var msgType = response.msgType;

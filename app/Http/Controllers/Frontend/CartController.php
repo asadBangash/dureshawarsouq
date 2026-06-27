@@ -28,6 +28,31 @@ class CartController extends Controller
 			$unit = 'piece';
 		}
 
+		// Resolve selected shade (optional) and its price server-side
+		$selectedShade = trim((string) $request->query('shade', ''));
+		$shadeName = '';
+		$shadeColor = '';
+		$shadeKey = '';
+		if ($selectedShade !== '') {
+			$shades = $datalist['shades'];
+			if (is_string($shades)) {
+				$shades = json_decode($shades, true);
+			}
+			if (is_array($shades)) {
+				foreach ($shades as $shade) {
+					if (isset($shade['name']) && $shade['name'] === $selectedShade) {
+						$shadeName = $shade['name'];
+						$shadeColor = $shade['color'] ?? '';
+						$shadeKey = \Illuminate\Support\Str::slug($shade['name']);
+						if (isset($shade['price']) && $shade['price'] !== null && $shade['price'] !== '') {
+							$price = $shade['price'];
+						}
+						break;
+					}
+				}
+			}
+		}
+
 		if ($price === null || $price === '') {
 			$res['msgType'] = 'error';
 			$res['msg'] = __('Price is not available for the selected unit.');
@@ -35,7 +60,7 @@ class CartController extends Controller
 		}
 
 		$data = array();
-		$data['id'] = $datalist['id'] . '-' . $unit;
+		$data['id'] = $datalist['id'] . '-' . $unit . ($shadeKey !== '' ? '-' . $shadeKey : '');
 		$data['name'] = $datalist['title'];
 		$data['qty'] = $qty == 0 ? 1 : $qty;
 		$data['price'] = $price;
@@ -44,6 +69,10 @@ class CartController extends Controller
 		$data['options']['product_id'] = $datalist['id'];
 		$data['options']['thumbnail'] = $datalist['f_thumbnail'];
 		$data['options']['unit'] = $unitLabel;
+		if ($shadeName !== '') {
+			$data['options']['shade'] = $shadeName;
+			$data['options']['shade_color'] = $shadeColor;
+		}
 		if ($unit === 'box' && !empty($datalist['pieces_per_box'])) {
 			$data['options']['pieces_per_box'] = $datalist['pieces_per_box'];
 		}
