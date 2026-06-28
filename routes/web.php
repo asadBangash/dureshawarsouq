@@ -47,6 +47,7 @@ Route::get('/frontend/getProductReviewsGrid', [App\Http\Controllers\Frontend\Pro
 //Add to cart
 Route::get('/frontend/add_to_cart/{id}/{qty}', [App\Http\Controllers\Frontend\CartController::class, 'AddToCart'])->name('frontend.add_to_cart');
 Route::get('/frontend/view_cart', [App\Http\Controllers\Frontend\CartController::class, 'ViewCart'])->name('frontend.view_cart');
+Route::get('/frontend/update_cart/{rowid}/{qty}', [App\Http\Controllers\Frontend\CartController::class, 'UpdateCart'])->name('frontend.update_cart');
 Route::get('/frontend/remove_to_cart/{rowid}', [App\Http\Controllers\Frontend\CartController::class, 'RemoveToCart'])->name('frontend.remove_to_cart');
 Route::get('/cart', [App\Http\Controllers\Frontend\CartController::class, 'getCart'])->name('frontend.cart');
 Route::get('/frontend/viewcart_data', [App\Http\Controllers\Frontend\CartController::class, 'getViewCartData'])->name('frontend.getViewCartData');

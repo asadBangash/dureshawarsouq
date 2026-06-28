@@ -90,10 +90,15 @@ $(function () {
 		$(".total_amount").text(TotalShippingfee);
     });
 
-	$("#checkout_submit_form").on("click", function () {
+    $("#checkout_submit_form").on("click", function () {
 		payment_method = $('input[name="payment_method"]:checked').val();
         $("#checkout_formid").submit();
     });
+
+	var $firstPayment = $('input[name="payment_method"]').first();
+	if ($firstPayment.length && !$('input[name="payment_method"]:checked').length) {
+		$firstPayment.prop('checked', true).trigger('click');
+	}
 });
 
 function addCommas(nStr){
@@ -117,6 +122,35 @@ function removeCommas(nStr){
 	}
 	
     return num;
+}
+
+function refreshCheckoutOrderSummary(response) {
+	if (!$('.carttotals-card').length || !response) {
+		return;
+	}
+
+	if (response.tax) {
+		$('.checkout_tax').text(response.tax);
+	}
+
+	var cartTotal = response.cart_total_number;
+	if (cartTotal === undefined) {
+		return;
+	}
+
+	$('.shipping_method').each(function () {
+		$(this).data('total', cartTotal);
+	});
+
+	var $selectedShipping = $('.shipping_method:checked');
+	if ($selectedShipping.length) {
+		var shippingfee = parseFloat($selectedShipping.data('shippingfee')) * parseFloat($selectedShipping.data('seller_count'));
+		var total = parseFloat(removeCommas(cartTotal)) + shippingfee;
+		$('.shipping_fee').text(shippingfee);
+		$('.total_amount').text(addCommas(total.toFixed(2)));
+	} else {
+		$('.total_amount').text(addCommas(parseFloat(removeCommas(cartTotal)).toFixed(2)));
+	}
 }
 
 function showPerslyError() {

@@ -162,89 +162,7 @@ config(['cart.tax' => $tax_rate]);
 								</div>
 							</div>
 						</div>
-						
-						<h5 class="mt10">{{ __('Payment Method') }}</h5>
-						<div class="row">
-							<div class="col-md-12">
-								<span class="text-danger error-text payment_method_error"></span>
-								@if($gtext['stripe_isenable'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_stripe" name="payment_method" type="radio" value="3"><img src="{{ asset('public/frontend/images/stripe.png') }}" alt="Stripe" />
-										</label>
-									</div>
-									<div id="pay_stripe" class="row hideclass">
-										<div class="col-md-12">
-											<div class="row">
-												<div class="col-md-12">
-													<div class="mb-3">
-														<div class="form-control" id="card-element"></div>
-														<span class="card-errors" id="card-errors"></span>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								@endif
-								
-								@if($gtext['isenable_paypal'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_paypal" name="payment_method" type="radio" value="4"><img src="{{ asset('public/frontend/images/paypal.png') }}" alt="Paypal" />
-										</label>
-									</div>
-									<p id="pay_paypal" class="hideclass">{{ __('Pay online via Paypal') }}</p>
-								</div>
-								@endif
-								
-								@if($gtext['isenable_razorpay'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_razorpay" name="payment_method" type="radio" value="5"><img src="{{ asset('public/frontend/images/razorpay.png') }}" alt="Razorpay" />
-										</label>
-									</div>
-									<p id="pay_razorpay" class="hideclass">{{ __('Pay online via Razorpay') }}</p>
-								</div>
-								@endif
-								
-								@if($gtext['isenable_mollie'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_mollie" name="payment_method" type="radio" value="6"><img src="{{ asset('public/frontend/images/mollie.png') }}" alt="Mollie" />
-										</label>
-									</div>
-									<p id="pay_mollie" class="hideclass">{{ __('Pay online via Mollie') }}</p>
-								</div>
-								@endif
-								
-								@if($gtext['cod_isenable'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_cod" name="payment_method" type="radio" value="1"><img src="{{ asset('public/frontend/images/cash_on_delivery.png') }}" alt="Cash on Delivery" />
-										</label>
-									</div>
-									<p id="pay_cod" class="hideclass">{{ $gtext['cod_description'] }}</p>
-								</div>
-								@endif
-								
-								@if($gtext['bank_isenable'] == 1)
-								<div class="payment_card">
-									<div class="checkboxlist">
-										<label class="checkbox-title">
-											<input id="payment_method_bank" name="payment_method" type="radio" value="2"><img src="{{ asset('public/frontend/images/bank_transfer.png') }}" alt="Bank Transfer" />
-										</label>
-									</div>
-									<p id="pay_bank" class="hideclass">{{ $gtext['bank_description'] }}</p>
-								</div>
-								@endif
-							</div>
-						</div>
+
 						<div class="row">
 							<div class="col-md-12">
 								<div class="mb-3 mt10">
@@ -269,11 +187,19 @@ config(['cart.tax' => $tax_rate]);
 											@php
 											$row->setTaxRate($tax_rate);
 											Cart::instance('shopping')->update($row->rowId, $row->qty);
+
+											$checkoutProductId = $row->options->product_id ?? $row->id;
+											$checkoutProduct = \App\Models\Product::find($checkoutProductId);
+											$checkoutStockQty = ($checkoutProduct && $checkoutProduct->is_stock == 1 && $checkoutProduct->stock_status_id == 1)
+												? (int) $checkoutProduct->stock_qty
+												: 999;
 											
 											$data = array(
 												'rowId' => $row->rowId, 
-												'id' => $row->id, 
-												'qty' => $row->qty, 
+												'id' => $row->id,
+												'product_id' => $checkoutProductId,
+												'qty' => $row->qty,
+												'stock_qty' => $checkoutStockQty,
 												'name' => $row->name, 
 												'price' => $row->price, 
 												'weight' => $row->weight, 
@@ -307,13 +233,16 @@ config(['cart.tax' => $tax_rate]);
 		
 										@foreach($CartData_Arr as $row)
 											@php
-
 											if($row['unit'] == '0'){
 												$unit = '';
 											}else{
-												$unit = '<strong>'.$row['qty'].' '.$row['unit'].'</strong>';
+												$unit = '<div class="checkout-qty-wrap cart-qty-wrap">'
+													.'<button type="button" class="qty-btn cart-qty-minus" data-rowid="'.$row['rowId'].'" data-qty="'.$row['qty'].'" data-stockqty="'.$row['stock_qty'].'">-</button>'
+													.'<span class="cart-qty-display">'.$row['qty'].'</span>'
+													.'<span class="checkout-qty-unit">'.$row['unit'].'</span>'
+													.'<button type="button" class="qty-btn cart-qty-plus" data-rowid="'.$row['rowId'].'" data-qty="'.$row['qty'].'" data-stockqty="'.$row['stock_qty'].'">+</button>'
+													.'</div>';
 											}
-											
 											@endphp
 											
 											@if($tempSellerId != $row['seller_id'])
@@ -324,25 +253,25 @@ config(['cart.tax' => $tax_rate]);
 											@endif
 											
 											@if($gtext['currency_position'] == 'left')
-											<tr>
+											<tr id="checkout_row_{{ $row['rowId'] }}">
 												<td>
-													<p class="title"><a href="{{ route('frontend.product', [$row['id'], str_slug($row['name'])]) }}">{{ $row['name'] }}</a></p>
+													<p class="title"><a href="{{ route('frontend.product', [$row['product_id'], str_slug($row['name'])]) }}">{{ $row['name'] }}</a></p>
 													<p class="sub-title">@php echo $unit; @endphp</p>
 												</td>
 												<td>
-													<p class="price">{{ $gtext['currency_icon'] }}{{ number_format($row['price']*$row['qty']) }}</p>
-													<p class="sub-price">{{ $gtext['currency_icon'] }}{{ $row['price'] }} x {{ $row['qty'] }}</p>
+													<p class="price checkout-line-total">{{ $gtext['currency_icon'] }}{{ number_format($row['price']*$row['qty']) }}</p>
+													<p class="sub-price">{{ $gtext['currency_icon'] }}{{ $row['price'] }} x <span class="checkout-qty-count">{{ $row['qty'] }}</span></p>
 												</td>
 											</tr>
 											@else
-											<tr>
+											<tr id="checkout_row_{{ $row['rowId'] }}">
 												<td>
-													<p class="title">{{ $row['name'] }}</p>
+													<p class="title"><a href="{{ route('frontend.product', [$row['product_id'], str_slug($row['name'])]) }}">{{ $row['name'] }}</a></p>
 													<p class="sub-title">@php echo $unit; @endphp</p>
 												</td>
 												<td>
-													<p class="price">{{ number_format($row['price']*$row['qty']) }}{{ $gtext['currency_icon'] }}</p>
-													<p class="sub-price">{{ $row['price'] }}{{ $gtext['currency_icon'] }} x {{ $row['qty'] }}</p>
+													<p class="price checkout-line-total">{{ number_format($row['price']*$row['qty']) }}{{ $gtext['currency_icon'] }}</p>
+													<p class="sub-price">{{ $row['price'] }}{{ $gtext['currency_icon'] }} x <span class="checkout-qty-count">{{ $row['qty'] }}</span></p>
 												</td>
 											</tr>
 											@endif
@@ -361,7 +290,7 @@ config(['cart.tax' => $tax_rate]);
 										@endphp
 										
 										<tr><td colspan="2"><span class="title">{{ __('Shipping Fee') }} </span><span class="price">@php echo $ShippingFee; @endphp</span></td></tr>
-										<tr><td colspan="2"><span class="title">{{ __('Tax') }}</span><span class="price">{{ $tax }}</span></td></tr>
+										<tr><td colspan="2"><span class="title">{{ __('Tax') }}</span><span class="price checkout_tax">{{ $tax }}</span></td></tr>
 										<tr><td colspan="2"><span class="total">{{ __('Total') }}</span><span class="total-price">@php echo $total; @endphp</span></td></tr>
 									</tbody>
 								</table>
@@ -387,6 +316,101 @@ config(['cart.tax' => $tax_rate]);
 									</div>
 								</div>
 								@endif
+
+								<h5 class="checkout-section-title">{{ __('Payment Method') }}</h5>
+								<div class="checkout-payment-methods">
+									<span class="text-danger error-text payment_method_error"></span>
+
+									@if($gtext['cod_isenable'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_cod">
+											<input id="payment_method_cod" name="payment_method" type="radio" value="1">
+											<span class="checkout-payment-icon cod"><i class="bi bi-cash-coin"></i></span>
+											<span class="checkout-payment-text">
+												<strong>{{ __('Cash on Delivery') }}</strong>
+												<small>{{ __('Pay when your order arrives') }}</small>
+											</span>
+										</label>
+										<p id="pay_cod" class="checkout-payment-note hideclass">{{ $gtext['cod_description'] }}</p>
+									</div>
+									@endif
+
+									@if($gtext['bank_isenable'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_bank">
+											<input id="payment_method_bank" name="payment_method" type="radio" value="2">
+											<span class="checkout-payment-icon bank"><i class="bi bi-bank2"></i></span>
+											<span class="checkout-payment-text">
+												<strong>{{ __('Bank Transfer') }}</strong>
+												<small>{{ __('Secure direct bank payment') }}</small>
+											</span>
+										</label>
+										<p id="pay_bank" class="checkout-payment-note hideclass">{{ $gtext['bank_description'] }}</p>
+									</div>
+									@endif
+
+									@if($gtext['stripe_isenable'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_stripe">
+											<input id="payment_method_stripe" name="payment_method" type="radio" value="3">
+											<span class="checkout-payment-icon stripe"><i class="bi bi-credit-card-2-front"></i></span>
+											<span class="checkout-payment-text">
+												<strong>{{ __('Credit / Debit Card') }}</strong>
+												<small>{{ __('Visa, Mastercard, Amex via Stripe') }}</small>
+											</span>
+										</label>
+										<div id="pay_stripe" class="checkout-payment-note hideclass">
+											<div class="mb-0">
+												<div class="form-control" id="card-element"></div>
+												<span class="card-errors" id="card-errors"></span>
+											</div>
+										</div>
+									</div>
+									@endif
+
+									@if($gtext['isenable_paypal'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_paypal">
+											<input id="payment_method_paypal" name="payment_method" type="radio" value="4">
+											<span class="checkout-payment-icon paypal"><i class="bi bi-paypal"></i></span>
+											<span class="checkout-payment-text">
+												<strong>PayPal</strong>
+												<small>{{ __('Fast & secure online checkout') }}</small>
+											</span>
+										</label>
+										<p id="pay_paypal" class="checkout-payment-note hideclass">{{ __('Pay online via Paypal') }}</p>
+									</div>
+									@endif
+
+									@if($gtext['isenable_razorpay'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_razorpay">
+											<input id="payment_method_razorpay" name="payment_method" type="radio" value="5">
+											<span class="checkout-payment-icon razorpay"><i class="bi bi-phone"></i></span>
+											<span class="checkout-payment-text">
+												<strong>Razorpay</strong>
+												<small>{{ __('UPI, cards & wallets') }}</small>
+											</span>
+										</label>
+										<p id="pay_razorpay" class="checkout-payment-note hideclass">{{ __('Pay online via Razorpay') }}</p>
+									</div>
+									@endif
+
+									@if($gtext['isenable_mollie'] == 1)
+									<div class="checkout-payment-option">
+										<label class="checkout-payment-label" for="payment_method_mollie">
+											<input id="payment_method_mollie" name="payment_method" type="radio" value="6">
+											<span class="checkout-payment-icon mollie"><i class="bi bi-wallet2"></i></span>
+											<span class="checkout-payment-text">
+												<strong>Mollie</strong>
+												<small>{{ __('European online payments') }}</small>
+											</span>
+										</label>
+										<p id="pay_mollie" class="checkout-payment-note hideclass">{{ __('Pay online via Mollie') }}</p>
+									</div>
+									@endif
+								</div>
+
 								<input name="customer_id" type="hidden" value="@if(isset(Auth::user()->id)) {{ Auth::user()->id }} @endif" />
 								<input name="razorpay_payment_id" id="razorpay_payment_id" type="hidden" />
 								<a id="checkout_submit_form" href="javascript:void(0);" class="btn theme-btn mt10 checkout_btn">{{ __('Checkout') }}</a>

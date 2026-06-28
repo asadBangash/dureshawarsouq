@@ -84,21 +84,6 @@ class ProductController extends Controller
 			$category_products[$i]->ReviewPercentage = number_format($Reviews[0]->ReviewPercentage);
 		}
 		
-		//Deals & Offers (discounted products) for the side panel
-		$deals_products = DB::table('products')
-			->leftJoin('users', 'products.user_id', '=', 'users.id')
-			->select('products.id', 'products.title', 'products.slug', 'products.f_thumbnail', 'products.sale_price', 'products.piece_price', 'products.old_price', 'products.is_discount')
-			->where('products.is_publish', '=', 1)
-			->where('products.is_discount', '=', 1)
-			->where(function ($query) {
-				$query->where('products.user_id', '=', 0)
-					->orWhere('users.status_id', '=', 1);
-			})
-			->whereNotIn('products.id', [$id])
-			->orderBy('products.id', 'desc')
-			->limit(8)
-			->get();
-
 		//Products Reviews
 		$pro_reviews = DB::table('reviews')
 			->join('users', 'reviews.user_id', '=', 'users.id')
@@ -111,7 +96,7 @@ class ProductController extends Controller
 			$pro_reviews[$i]->rating = $pro_reviews[$i]->rating*20;
 		}
 
-        return view('frontend.product', compact('data', 'pro_images', 'related_products', 'category_products', 'deals_products', 'pro_reviews'));
+        return view('frontend.product', compact('data', 'pro_images', 'related_products', 'category_products', 'pro_reviews'));
     }
 	
 	//Get data for Products Reviews Pagination

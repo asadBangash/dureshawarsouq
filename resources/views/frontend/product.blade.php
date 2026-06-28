@@ -221,47 +221,6 @@
 							<li><i class="bi bi-arrow-repeat"></i> {{ __('Easy Returns') }}</li>
 						</ul>
 					</div>
-
-					@if(count($deals_products) > 0)
-					<div class="pr_deals_card">
-						<div class="pr_deals_head">
-							<i class="bi bi-fire"></i> {{ __('Deals & Offers') }}
-						</div>
-						<ul class="pr_deals_list">
-							@foreach($deals_products as $deal)
-							@php
-								$dealPrice = $deal->piece_price ?? $deal->sale_price;
-								$dealDiscount = 0;
-								if($deal->is_discount == 1 && $deal->old_price && $dealPrice){
-									$dealDiscount = number_format((($deal->old_price - $dealPrice)*100)/$deal->old_price);
-								}
-							@endphp
-							<li>
-								<a href="{{ route('frontend.product', [$deal->id, $deal->slug]) }}" class="pr_deal_item">
-									<span class="pr_deal_thumb">
-										<img src="{{ asset('public/media/'.$deal->f_thumbnail) }}" alt="{{ $deal->title }}" />
-										@if($dealDiscount > 0)
-										<span class="pr_deal_badge">-{{ $dealDiscount }}%</span>
-										@endif
-									</span>
-									<span class="pr_deal_info">
-										<span class="pr_deal_title">{{ str_limit($deal->title, 40) }}</span>
-										<span class="pr_deal_price">
-											@if($gtext['currency_position'] == 'left')
-											<span class="pr_deal_new">{{ $gtext['currency_icon'] }}{{ number_format($dealPrice, 2) }}</span>
-											@if($dealDiscount > 0)<span class="pr_deal_old">{{ $gtext['currency_icon'] }}{{ number_format($deal->old_price) }}</span>@endif
-											@else
-											<span class="pr_deal_new">{{ number_format($dealPrice, 2) }}{{ $gtext['currency_icon'] }}</span>
-											@if($dealDiscount > 0)<span class="pr_deal_old">{{ number_format($deal->old_price) }}{{ $gtext['currency_icon'] }}</span>@endif
-											@endif
-										</span>
-									</span>
-								</a>
-							</li>
-							@endforeach
-						</ul>
-					</div>
-					@endif
 				</div>
 			</div>
 

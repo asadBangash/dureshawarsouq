@@ -120,11 +120,22 @@ class CartController extends Controller
 				$unitDisplay .= ' ('.$row->options->pieces_per_box.' pcs)';
 			}
 
+			$product = Product::find($productId);
+			$stockQty = ($product && $product->is_stock == 1 && $product->stock_status_id == 1)
+				? (int) $product->stock_qty
+				: 999;
+
 			if($gtext['currency_position'] == 'left'){
-				$price = '<span id="product-quatity">'.$row->qty.'</span> x '.$gtext['currency_icon'].$row->price; 
+				$unitPrice = $gtext['currency_icon'].$row->price;
 			}else{
-				$price = '<span id="product-quatity">'.$row->qty.'</span> x '.$row->price.$gtext['currency_icon']; 
+				$unitPrice = $row->price.$gtext['currency_icon'];
 			}
+
+			$qtyControls = '<div class="cart-qty-wrap mini-cart-qty">'
+				.'<button type="button" class="mini-qty-btn cart-qty-minus" data-rowid="'.$row->rowId.'" data-qty="'.$row->qty.'" data-stockqty="'.$stockQty.'">-</button>'
+				.'<span class="mini-qty-val cart-qty-display">'.$row->qty.'</span>'
+				.'<button type="button" class="mini-qty-btn cart-qty-plus" data-rowid="'.$row->rowId.'" data-qty="'.$row->qty.'" data-stockqty="'.$stockQty.'">+</button>'
+				.'</div>';
 		
 			$items .= '<li>
 						<div class="cart-item-card">
@@ -134,7 +145,8 @@ class CartController extends Controller
 							</div>
 							<div class="cart-item-desc">
 								<h6><a href="'.route('frontend.product', [$productId, str_slug($row->name)]).'">'.$row->name.'</a></h6>
-								<p>'.$price.' ('.$unitDisplay.')</p>
+								<p><span class="mini-cart-price">'.$unitPrice.'</span> ('.$unitDisplay.')</p>
+								'.$qtyControls.'
 							</div>
 						</div>
 					</li>';
@@ -162,6 +174,91 @@ class CartController extends Controller
 		}
 
 		return response()->json($datalist);
+	}
+
+	//Update Cart quantity
+	public function UpdateCart($rowid, $qty){
+		$res = array();
+		$gtext = gtext();
+		$gtax = getTax();
+
+		$item = Cart::instance('shopping')->get($rowid);
+		if (!$item) {
+			$res['msgType'] = 'error';
+			$res['msg'] = __('Item not found in cart.');
+			return response()->json($res);
+		}
+
+		$qty = (int) $qty;
+
+		if ($qty <= 0) {
+			Cart::instance('shopping')->remove($rowid);
+			$res['msgType'] = 'success';
+			$res['msg'] = __('Data Removed Successfully');
+			$res['removed'] = true;
+		} else {
+			$productId = $item->options->product_id ?? explode('-', $item->id)[0];
+			$product = Product::find($productId);
+
+			if ($product && $product->is_stock == 1) {
+				if ($product->stock_status_id != 1) {
+					$res['msgType'] = 'error';
+					$res['msg'] = __('This product out of stock.');
+					return response()->json($res);
+				}
+				if ($qty > $product->stock_qty) {
+					$res['msgType'] = 'error';
+					$res['msg'] = __('The value must be less than or equal to').' '.$product->stock_qty;
+					return response()->json($res);
+				}
+			}
+
+			Cart::instance('shopping')->update($rowid, $qty);
+			$res['msgType'] = 'success';
+			$res['msg'] = __('Cart updated successfully.');
+			$res['removed'] = false;
+			$res['qty'] = $qty;
+
+			$updated = Cart::instance('shopping')->get($rowid);
+			$lineTotal = $updated->price * $qty;
+			if ($gtext['currency_position'] == 'left') {
+				$res['line_total'] = $gtext['currency_icon'].number_format($lineTotal, 2);
+				$res['line_sub_price'] = $gtext['currency_icon'].number_format($updated->price, 2).' x '.$qty;
+			} else {
+				$res['line_total'] = number_format($lineTotal, 2).$gtext['currency_icon'];
+				$res['line_sub_price'] = number_format($updated->price, 2).$gtext['currency_icon'].' x '.$qty;
+			}
+		}
+
+		$tax_rate = $gtax['percentage'];
+		config(['cart.tax' => $tax_rate]);
+
+		foreach (Cart::instance('shopping')->content() as $row) {
+			$row->setTaxRate($tax_rate);
+			Cart::instance('shopping')->update($row->rowId, $row->qty);
+		}
+
+		$count = Cart::instance('shopping')->count();
+		$subtotal = Cart::instance('shopping')->subtotal();
+		$tax = Cart::instance('shopping')->tax();
+		$priceTotal = Cart::instance('shopping')->priceTotal();
+		$total = Cart::instance('shopping')->total();
+
+		$res['total_qty'] = $count;
+		$res['cart_total_number'] = $total;
+		if ($gtext['currency_position'] == 'left') {
+			$res['sub_total'] = $gtext['currency_icon'].$subtotal;
+			$res['tax'] = $gtext['currency_icon'].$tax;
+			$res['price_total'] = $gtext['currency_icon'].$priceTotal;
+			$res['total'] = $gtext['currency_icon'].$total;
+		} else {
+			$res['sub_total'] = $subtotal.$gtext['currency_icon'];
+			$res['tax'] = $tax.$gtext['currency_icon'];
+			$res['price_total'] = $priceTotal.$gtext['currency_icon'];
+			$res['total'] = $total.$gtext['currency_icon'];
+		}
+
+		return response()->json($res);
 	}
 	
 	//Remove to Cart

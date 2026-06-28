@@ -112,6 +112,10 @@ $gtax = getTax();
 
 								@php
 									$productId = $row->options->product_id ?? $row->id;
+									$product = \App\Models\Product::find($productId);
+									$stockQty = ($product && $product->is_stock == 1 && $product->stock_status_id == 1)
+										? (int) $product->stock_qty
+										: 999;
 								@endphp
 
 								<tr id="row_delete_{{ $row->rowId }}">
@@ -146,7 +150,11 @@ $gtax = getTax();
 										<span class="pro-price"><span class="pro-price">{{ $price }}</span></span>
 									</td>
 									<td class="text-center pro-quantity-w" data-title="{{ __('Quantity') }}:">
-										<div class="pro-quantity">{{ $row->qty }}</div>
+										<div class="pro-quantity">
+											<button type="button" class="qty-btn cart-qty-minus" data-rowid="{{ $row->rowId }}" data-qty="{{ $row->qty }}" data-stockqty="{{ $stockQty }}">-</button>
+											<input type="text" class="quantity cart-qty-input" value="{{ $row->qty }}" data-rowid="{{ $row->rowId }}" readonly>
+											<button type="button" class="qty-btn cart-qty-plus" data-rowid="{{ $row->rowId }}" data-qty="{{ $row->qty }}" data-stockqty="{{ $stockQty }}">+</button>
+										</div>
 									</td>
 									<td class="text-center pro-total-price-w" data-title="{{ __('Total') }}:">
 										<span class="pro-total-price">{{ $totalPrice }}</span>
